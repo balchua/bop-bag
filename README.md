@@ -32,23 +32,24 @@ The implementation will be a simple go based called `TaskRepository`.
 
 ### REST Endpoints
 
-* GET all tasks 
+- [X] GET all tasks
+  
   * Endpoint: `/tasks/`
   * Method : `GET`
-
-* GET a task
+ 
+- [X] GET a task
   * Endpoint: `/task/{id}`
   * Method: `GET`
-
-* Insert a task
+ 
+- [X] Insert a task
   * Endpoint `/task`
   * Method: `PUT`
 
-* Update a task
+- [ ] Update a task
   * Endpoint: `/task/{id}`
   * Method: `PUT`
 
-* Delete a task
+- [ ] Delete a task
   * Endpoint: `/task/{id}`
   * Method: `DELETE`
 
@@ -56,12 +57,11 @@ The implementation will be a simple go based called `TaskRepository`.
 
 The joining process must be automatic.
 
-
-
-
 ## Build
 
 Assume that you have local registry running at `localhost:32000`
+
+### Building with docker
 
 Build the base image
 
@@ -75,8 +75,25 @@ Building the app
 docker build -t localhost:32000/uncapsizable:1.0.0 .
 ```
 
+### Building in your host
 
-### Starting the nodes
+Pre-requisite:
+* Install `dqlite`, instructions here https://github.com/canonical/dqlite#install.  Use the `master` version.  
+
+```shell
+sudo add-apt-repository ppa:dqlite/master 
+sudo apt update
+sudo apt-get -y install clang lcov libsqlite3-dev libraft-dev 
+```
+
+Finally build the application
+
+```shell
+export CGO_LDFLAGS_ALLOW="-Wl,-z,now"
+go build .
+```
+
+### Starting the nodes on local machine
 
 First node
 ```

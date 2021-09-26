@@ -29,6 +29,7 @@ func (t *TaskService) CreateTask(ctx context.Context, task *domain.Task) (*domai
 	lg, _ := zap.NewProduction()
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(20)*time.Millisecond)
 	defer cancel()
+
 	var newTask *domain.Task
 	//validate the fields as part of the business requirement
 	if t.isValidTask(task) {
