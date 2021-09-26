@@ -24,7 +24,7 @@ func TestSuccessfulInsert(t *testing.T) {
 	defer os.Remove(dir)
 	dbAddress := "127.0.0.1:50000"
 	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil)
-
+	defer dqliteInst.CloseDqlite()
 	task := &domain.Task{
 		Title:       "test",
 		Details:     "test",
@@ -35,8 +35,6 @@ func TestSuccessfulInsert(t *testing.T) {
 	repo.Add(task)
 	assert.NotNil(repo)
 	assert.Nil(err)
-
-	dqliteInst.CloseDqlite()
 }
 
 func TestSuccessfulFindOne(t *testing.T) {
@@ -50,6 +48,7 @@ func TestSuccessfulFindOne(t *testing.T) {
 	defer os.Remove(dir)
 	dbAddress := "127.0.0.1:50000"
 	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil)
+	defer dqliteInst.CloseDqlite()
 
 	task := &domain.Task{
 		Title:       "test",
@@ -64,7 +63,7 @@ func TestSuccessfulFindOne(t *testing.T) {
 	assert.NotNil(insertedTask)
 	assert.Equal(insertedTask.Id, int64(1))
 	assert.Nil(err)
-	dqliteInst.CloseDqlite()
+
 }
 
 func TestSuccessfulFindAll(t *testing.T) {
@@ -78,6 +77,7 @@ func TestSuccessfulFindAll(t *testing.T) {
 	defer os.Remove(dir)
 	dbAddress := "127.0.0.1:50000"
 	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil)
+	defer dqliteInst.CloseDqlite()
 
 	task := &domain.Task{
 		Title:       "test",
@@ -92,5 +92,5 @@ func TestSuccessfulFindAll(t *testing.T) {
 	assert.NotNil(tasks)
 	assert.Equal(len(*tasks), 1)
 	assert.Nil(err)
-	dqliteInst.CloseDqlite()
+
 }
