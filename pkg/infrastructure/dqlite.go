@@ -62,6 +62,10 @@ func NewDqlite(log *applog.Logger, dbPath string, dbAddress string, join []strin
 	return dqliteInstance, nil
 }
 
+func (d *Dqlite) CloseDqlite() error {
+	return d.dqlite.Close()
+}
+
 func (d *Dqlite) open() error {
 	db, err := d.dqlite.Open(context.Background(), DB_NAME)
 	if err != nil {
