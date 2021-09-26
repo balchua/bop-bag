@@ -86,11 +86,11 @@ First node
 Second node
 
 ```
-./uncapsizable serve --db /tmp/dbPath2 --port 8081 --dbPort 9001 --join 0.0.0.0:9000
+./uncapsizable serve --db /tmp/dbPath2 --port 8081 --dbAddress localhost:9001 --join 0.0.0.0:9000
 ```
 
 Third node
 
 ```
-./uncapsizable serve --db /tmp/dbPath3/ --port 8082 --dbPort 9003 --join 0.0.0.0:9000
+./uncapsizable serve --db /tmp/dbPath3/ --port 8082 --dbAddress  localhost:9003 --join 0.0.0.0:9000
 ```

@@ -1,29 +1,35 @@
 package controller
 
 import (
+	"context"
 	"strconv"
 
+	"github.com/balchua/uncapsizable/pkg/domain"
 	"github.com/balchua/uncapsizable/pkg/repository"
+	"github.com/balchua/uncapsizable/pkg/usecase"
 	fiber "github.com/gofiber/fiber/v2"
 )
 
 type TaskController struct {
-	taskRepo *repository.TaskRepository
+	taskService *usecase.TaskService
 }
 
-func NewQueryController(taskRepo *repository.TaskRepository) *TaskController {
+func NewTaskController(taskRepo *repository.TaskRepository) *TaskController {
+
+	ts := usecase.NewTaskService(taskRepo)
 	return &TaskController{
-		taskRepo: taskRepo,
+		taskService: ts,
 	}
 }
 
 func (q *TaskController) NewTask(c *fiber.Ctx) error {
 
-	task := new(repository.Task)
+	ctx := context.Background()
+	task := new(domain.Task)
 	if err := c.BodyParser(task); err != nil {
 		return fiber.NewError(fiber.StatusServiceUnavailable, "marshalling error!")
 	}
-	newTask, err := q.taskRepo.Add(task)
+	newTask, err := q.taskService.CreateTask(ctx, task)
 	if err != nil {
 		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
 	}
@@ -32,11 +38,12 @@ func (q *TaskController) NewTask(c *fiber.Ctx) error {
 }
 
 func (q *TaskController) FindById(c *fiber.Ctx) error {
+	ctx := context.Background()
 	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
 	if err != nil {
 		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
 	}
-	task, queryError := q.taskRepo.FindById(id)
+	task, queryError := q.taskService.GetTaskById(ctx, id)
 	if queryError != nil {
 		return fiber.NewError(fiber.StatusServiceUnavailable, queryError.Error())
 	}
@@ -46,7 +53,8 @@ func (q *TaskController) FindById(c *fiber.Ctx) error {
 }
 
 func (q *TaskController) FindAll(c *fiber.Ctx) error {
-	tasks, queryError := q.taskRepo.FindAll()
+	ctx := context.Background()
+	tasks, queryError := q.taskService.GetAllTasks(ctx)
 	if queryError != nil {
 		return fiber.NewError(fiber.StatusServiceUnavailable, queryError.Error())
 	}

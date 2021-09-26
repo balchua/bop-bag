@@ -3,6 +3,8 @@ package repository
 import (
 	"database/sql"
 
+	"github.com/balchua/uncapsizable/pkg/applog"
+	"github.com/balchua/uncapsizable/pkg/domain"
 	"go.uber.org/zap"
 )
 
@@ -14,22 +16,14 @@ const (
 )
 
 type TaskRepository struct {
-	db  *sql.DB
-	log *zap.Logger
+	db  Db
+	log *applog.Logger
 }
 
-type Task struct {
-	Id          int64  `json:"id"`
-	Title       string `json:"title"`
-	Details     string `json:"details"`
-	CreatedDate string `json:"createdDate"`
-}
-
-func NewTaskRepository(db *sql.DB) (*TaskRepository, error) {
-	lg, _ := zap.NewProduction()
+func NewTaskRepository(applog *applog.Logger, db Db) (*TaskRepository, error) {
 	taskRepo := &TaskRepository{
 		db:  db,
-		log: lg,
+		log: applog,
 	}
 	err := taskRepo.migrate()
 
@@ -40,26 +34,24 @@ func NewTaskRepository(db *sql.DB) (*TaskRepository, error) {
 }
 
 func (t *TaskRepository) migrate() error {
-
 	var err error
 	if _, err = t.db.Exec(taskSchema); err != nil {
-		t.log.Fatal("unable to create schema %v", zap.Error(err))
+		t.log.Log.Fatal("unable to create schema", zap.Error(err))
 	}
 	return err
 }
 
-func (t *TaskRepository) Add(task *Task) (*Task, error) {
+func (t *TaskRepository) Add(task *domain.Task) (*domain.Task, error) {
 	var err error
 	var result sql.Result
 	if result, err = t.db.Exec(insert, task.Title, task.Details, task.CreatedDate); err != nil {
-		t.log.Fatal("unable to save ", zap.String("title", task.Title))
 		return nil, err
 	}
 
 	rowsAffected, err := result.RowsAffected()
-	t.log.Info("record inserted", zap.Int64("records", rowsAffected))
+	t.log.Log.Info("record inserted", zap.Int64("records", rowsAffected))
 	id, _ := result.LastInsertId()
-	returnTask := &Task{
+	returnTask := &domain.Task{
 		Id:          id,
 		Title:       task.Title,
 		Details:     task.Details,
@@ -68,22 +60,21 @@ func (t *TaskRepository) Add(task *Task) (*Task, error) {
 	return returnTask, err
 }
 
-func (t *TaskRepository) FindById(id int64) (*Task, error) {
-	var task Task
+func (t *TaskRepository) FindById(id int64) (*domain.Task, error) {
+	var task domain.Task
 	lg, _ := zap.NewProduction()
 	lg.Info("Id to find", zap.Int64("id", id))
 
 	row := t.db.QueryRow(findById, id)
 	if err := row.Scan(&task.Id, &task.Title, &task.Details, &task.CreatedDate); err != nil {
-		lg.Error("no record found", zap.Error(err))
 		return nil, err
 	}
 	return &task, nil
 
 }
 
-func (t *TaskRepository) FindAll() (*[]Task, error) {
-	var tasks []Task
+func (t *TaskRepository) FindAll() (*[]domain.Task, error) {
+	var tasks []domain.Task
 	lg, _ := zap.NewProduction()
 
 	var (
@@ -98,7 +89,7 @@ func (t *TaskRepository) FindAll() (*[]Task, error) {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var task Task
+		var task domain.Task
 		if err := rows.Scan(&taskId, &taskTitle, &taskDetails, &taskCreatedDate); err != nil {
 			lg.Error("no record found", zap.Error(err))
 			return nil, err
@@ -107,7 +98,7 @@ func (t *TaskRepository) FindAll() (*[]Task, error) {
 			zap.String("details", taskDetails.String),
 			zap.String("createdDate", taskCreatedDate.String))
 
-		task = Task{
+		task = domain.Task{
 			Id:          taskId.Int64,
 			Title:       taskTitle.String,
 			Details:     taskDetails.String,

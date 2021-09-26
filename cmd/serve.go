@@ -16,17 +16,16 @@ limitations under the License.
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"strconv"
-	"time"
 
+	"github.com/balchua/uncapsizable/pkg/applog"
 	"github.com/balchua/uncapsizable/pkg/controller"
+	"github.com/balchua/uncapsizable/pkg/infrastructure"
 	"github.com/balchua/uncapsizable/pkg/repository"
-	"github.com/canonical/go-dqlite/app"
 	"github.com/canonical/go-dqlite/client"
 	fiber "github.com/gofiber/fiber/v2"
 	"github.com/spf13/cobra"
@@ -42,11 +41,12 @@ var (
 		Long:  `Starts the application along with its database`,
 		Run:   start,
 	}
-	dbPath   string
-	join     []string
-	port     int
-	dbPort   int
-	taskRepo *repository.TaskRepository
+	dbPath    string
+	join      []string
+	port      int
+	dbAddress string
+	taskRepo  *repository.TaskRepository
+	applogger *applog.Logger
 )
 
 func init() {
@@ -54,14 +54,14 @@ func init() {
 	serveCmd.PersistentFlags().StringVar(&dbPath, "db", "./", "Path to dqlite database files")
 	serveCmd.PersistentFlags().StringSliceVar(&join, "join", []string{}, "Location of the main node to join to")
 	serveCmd.PersistentFlags().IntVar(&port, "port", 8000, "Application web server port")
-	serveCmd.PersistentFlags().IntVar(&dbPort, "dbPort", 9000, "the database port")
+	serveCmd.PersistentFlags().StringVar(&dbAddress, "dbAddress", "localhost:9000", "the database port ex. localhost:9000")
 
 }
 
 func startAppServer() {
 	lg, _ := zap.NewProduction()
 
-	taskController := controller.NewQueryController(taskRepo)
+	taskController := controller.NewTaskController(taskRepo)
 
 	// Fiber instance
 	app := fiber.New()
@@ -82,33 +82,18 @@ func dqliteLog(l client.LogLevel, format string, a ...interface{}) {
 }
 
 func startDqLite() {
-	lg, _ := zap.NewProduction()
-	var dqlite *app.App
-	var err error
-	if join == nil {
-		dqlite, err = app.New(dbPath, app.WithAddress("0.0.0.0:"+strconv.Itoa(dbPort)), app.WithLogFunc(dqliteLog))
-	} else {
-		dqlite, err = app.New(dbPath, app.WithAddress("0.0.0.0:"+strconv.Itoa(dbPort)), app.WithCluster(join), app.WithLogFunc(dqliteLog))
-	}
+	dqliteInst, err := infrastructure.NewDqlite(applogger, dbPath, dbAddress, join)
 
 	if err != nil {
-		lg.Fatal("Error while initializing dqlite %v", zap.Error(err))
+		applogger.Log.Sugar().Fatalf("unable to instantiate dqlite %v", err)
 	}
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(10*time.Second))
-	if err := dqlite.Ready(ctx); err != nil {
-		lg.Fatal("Error while initializing dqlite %v", zap.Error(err))
-	}
-	db, _ := dqlite.Open(context.Background(), "uncapsizable")
-	db.SetMaxOpenConns(5)
-	db.SetConnMaxIdleTime(10 * time.Second)
-	db.SetMaxIdleConns(5)
-	lg.Info("database started")
 
-	taskRepo, _ = repository.NewTaskRepository(db)
+	taskRepo, _ = repository.NewTaskRepository(applogger, dqliteInst)
 }
 
 func start(cmd *cobra.Command, args []string) {
 
+	applogger = applog.NewLogger()
 	startDqLite()
 	startAppServer()
 

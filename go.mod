@@ -3,6 +3,7 @@ module github.com/balchua/uncapsizable
 go 1.16
 
 require (
+	github.com/Rican7/retry v0.3.1 // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/canonical/go-dqlite v1.9.0
 	github.com/gofiber/fiber/v2 v2.19.0
