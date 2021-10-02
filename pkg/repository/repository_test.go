@@ -23,7 +23,7 @@ func TestSuccessfulInsert(t *testing.T) {
 	}
 	defer os.Remove(dir)
 	dbAddress := "127.0.0.1:50000"
-	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil)
+	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil, false)
 	defer dqliteInst.CloseDqlite()
 	task := &domain.Task{
 		Title:       "test",
@@ -47,7 +47,7 @@ func TestSuccessfulFindOne(t *testing.T) {
 	}
 	defer os.Remove(dir)
 	dbAddress := "127.0.0.1:50000"
-	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil)
+	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil, false)
 	defer dqliteInst.CloseDqlite()
 
 	task := &domain.Task{
@@ -76,7 +76,7 @@ func TestSuccessfulFindAll(t *testing.T) {
 	}
 	defer os.Remove(dir)
 	dbAddress := "127.0.0.1:50000"
-	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil)
+	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil, false)
 	defer dqliteInst.CloseDqlite()
 
 	task := &domain.Task{

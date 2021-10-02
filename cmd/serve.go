@@ -41,12 +41,14 @@ var (
 		Long:  `Starts the application along with its database`,
 		Run:   start,
 	}
-	dbPath    string
-	join      []string
-	port      int
-	dbAddress string
-	taskRepo  *repository.TaskRepository
-	applogger *applog.Logger
+	dbPath      string
+	join        []string
+	port        int
+	dbAddress   string
+	taskRepo    *repository.TaskRepository
+	clusterRepo *repository.ClusterRepository
+	applogger   *applog.Logger
+	enableTls   bool
 )
 
 func init() {
@@ -55,6 +57,7 @@ func init() {
 	serveCmd.PersistentFlags().StringSliceVar(&join, "join", []string{}, "Location of the main node to join to")
 	serveCmd.PersistentFlags().IntVar(&port, "port", 8000, "Application web server port")
 	serveCmd.PersistentFlags().StringVar(&dbAddress, "dbAddress", "localhost:9000", "the database port ex. localhost:9000")
+	serveCmd.PersistentFlags().BoolVar(&enableTls, "enableTls", true, "Enable secure mode")
 
 }
 
@@ -62,6 +65,7 @@ func startAppServer() {
 	lg, _ := zap.NewProduction()
 
 	taskController := controller.NewTaskController(taskRepo)
+	clusterController := controller.NewClusterController(clusterRepo)
 
 	// Fiber instance
 	app := fiber.New()
@@ -70,6 +74,7 @@ func startAppServer() {
 	app.Get("/api/v1/task/:id", taskController.FindById)
 	app.Get("/api/v1/tasks", taskController.FindAll)
 	app.Post("/api/v1/task", taskController.NewTask)
+	app.Get("/api/v1/clusterInfo", clusterController.ShowCluster)
 
 	appErr := app.Listen(":" + strconv.Itoa(port))
 	if appErr != nil {
@@ -82,13 +87,14 @@ func dqliteLog(l client.LogLevel, format string, a ...interface{}) {
 }
 
 func startDqLite() {
-	dqliteInst, err := infrastructure.NewDqlite(applogger, dbPath, dbAddress, join)
+	dqliteInst, err := infrastructure.NewDqlite(applogger, dbPath, dbAddress, join, enableTls)
 
 	if err != nil {
 		applogger.Log.Sugar().Fatalf("unable to instantiate dqlite %v", err)
 	}
 
 	taskRepo, _ = repository.NewTaskRepository(applogger, dqliteInst)
+	clusterRepo = repository.NewClusterRepository(dqliteInst)
 }
 
 func start(cmd *cobra.Command, args []string) {

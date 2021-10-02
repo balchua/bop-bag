@@ -14,6 +14,13 @@ A service that can sustain failures with low ops.
 * Simple to join a node to the cluster.
 * Must be able to demonstrate the auto cluster realignment when a node goes down.
 
+## Generate certificates
+
+There is a sample openssl configuration template that you can use [here](default-certs/csr-dqlite.conf.template)
+
+```shell
+openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes -keyout ${HOME}/bopbag/certs/cluster.key -out ${HOME}/bopbag/certs/cluster.crt -subj "/CN=bopbag" -config csr-dqlite.conf -extensions v3_ext
+```
 
 ## Implementation
 
@@ -76,7 +83,7 @@ docker build -t localhost:32000/dqlite-base:1.0.0
 Building the app 
 
 ```
-docker build -t localhost:32000/uncapsizable:1.0.0 .
+docker build -t localhost:32000/bopbag:1.0.0 .
 ```
 
 ### Building in your host
@@ -101,17 +108,17 @@ go build .
 
 First node
 ```
-./uncapsizable serve --db /tmp/dbPath
+./bopbag serve --db /tmp/dbPath
 ```
 
 Second node
 
 ```
-./uncapsizable serve --db /tmp/dbPath2 --port 8081 --dbAddress localhost:9001 --join 0.0.0.0:9000
+./bopbag serve --db /tmp/dbPath2 --port 8081 --dbAddress localhost:9001 --join 0.0.0.0:9000
 ```
 
 Third node
 
 ```
-./uncapsizable serve --db /tmp/dbPath3/ --port 8082 --dbAddress  localhost:9003 --join 0.0.0.0:9000
+./bopbag serve --db /tmp/dbPath3/ --port 8082 --dbAddress  localhost:9003 --join 0.0.0.0:9000
 ```

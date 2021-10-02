@@ -1,13 +1,21 @@
 package infrastructure
 
 import (
+	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"database/sql"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"path/filepath"
 	"time"
 
 	"github.com/balchua/bopbag/pkg/applog"
 	"github.com/canonical/go-dqlite/app"
 	"github.com/canonical/go-dqlite/client"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -24,7 +32,7 @@ type Dqlite struct {
 	db      *sql.DB
 }
 
-func NewDqlite(log *applog.Logger, dbPath string, dbAddress string, join []string) (*Dqlite, error) {
+func NewDqlite(log *applog.Logger, dbPath string, dbAddress string, join []string, enableTls bool) (*Dqlite, error) {
 
 	var dqlite *app.App
 	var err error
@@ -34,11 +42,36 @@ func NewDqlite(log *applog.Logger, dbPath string, dbAddress string, join []strin
 	dqliteInstance.address = dbAddress
 	dqliteInstance.log = log
 
-	if join == nil {
-		dqlite, err = app.New(dbPath, app.WithAddress(dqliteInstance.address), app.WithLogFunc(dqliteInstance.dqliteLog))
-	} else {
-		dqlite, err = app.New(dbPath, app.WithAddress(dqliteInstance.address), app.WithCluster(join), app.WithLogFunc(dqliteInstance.dqliteLog))
+	// Load the TLS certificates.
+	crt := filepath.Join(dbPath, "cluster.crt")
+	key := filepath.Join(dbPath, "cluster.key")
+
+	keypair, err := tls.LoadX509KeyPair(crt, key)
+	if err != nil {
+		return nil, errors.Wrap(err, "load keypair")
 	}
+	data, err := ioutil.ReadFile(crt)
+	if err != nil {
+		return nil, errors.Wrap(err, "read certificate")
+	}
+	pool := x509.NewCertPool()
+	if !pool.AppendCertsFromPEM(data) {
+		return nil, fmt.Errorf("bad certificate")
+	}
+	options := []app.Option{
+		app.WithAddress(dqliteInstance.address),
+		app.WithLogFunc(dqliteInstance.dqliteLog),
+	}
+
+	if enableTls {
+		options = append(options, app.WithTLS(app.SimpleTLSConfig(keypair, pool)))
+	}
+
+	if join != nil {
+		options = append(options, app.WithCluster(join))
+	}
+
+	dqlite, err = app.New(dbPath, options...)
 
 	if err != nil {
 		log.Log.Fatal("Error while initializing dqlite %v", zap.Error(err))
@@ -96,4 +129,26 @@ func (d *Dqlite) Exec(query string, args ...interface{}) (sql.Result, error) {
 
 func (d *Dqlite) QueryRow(query string, args ...interface{}) *sql.Row {
 	return d.db.QueryRow(query, args...)
+}
+
+func (d *Dqlite) GetClusterInfo() (string, error) {
+	ctx := context.Background()
+	cli, err := d.dqlite.Client(ctx)
+	if err != nil {
+		return "", err
+	}
+	cluster, err := cli.Cluster(ctx)
+	if err != nil {
+		return "", err
+	}
+	result := ""
+	data, err := json.Marshal(cluster)
+	if err != nil {
+		return "", err
+	}
+	var indented bytes.Buffer
+	json.Indent(&indented, data, "", "\t")
+	result = string(indented.Bytes())
+
+	return result, nil
 }
