@@ -42,28 +42,28 @@ func NewDqlite(log *applog.Logger, dbPath string, dbAddress string, join []strin
 	dqliteInstance.address = dbAddress
 	dqliteInstance.log = log
 
-	// Load the TLS certificates.
-	crt := filepath.Join(dbPath, "cluster.crt")
-	key := filepath.Join(dbPath, "cluster.key")
-
-	keypair, err := tls.LoadX509KeyPair(crt, key)
-	if err != nil {
-		return nil, errors.Wrap(err, "load keypair")
-	}
-	data, err := ioutil.ReadFile(crt)
-	if err != nil {
-		return nil, errors.Wrap(err, "read certificate")
-	}
-	pool := x509.NewCertPool()
-	if !pool.AppendCertsFromPEM(data) {
-		return nil, fmt.Errorf("bad certificate")
-	}
 	options := []app.Option{
 		app.WithAddress(dqliteInstance.address),
 		app.WithLogFunc(dqliteInstance.dqliteLog),
 	}
 
 	if enableTls {
+		// Load the TLS certificates.
+		crt := filepath.Join(dbPath, "cluster.crt")
+		key := filepath.Join(dbPath, "cluster.key")
+
+		keypair, err := tls.LoadX509KeyPair(crt, key)
+		if err != nil {
+			return nil, errors.Wrap(err, "load keypair")
+		}
+		data, err := ioutil.ReadFile(crt)
+		if err != nil {
+			return nil, errors.Wrap(err, "read certificate")
+		}
+		pool := x509.NewCertPool()
+		if !pool.AppendCertsFromPEM(data) {
+			return nil, fmt.Errorf("bad certificate")
+		}
 		options = append(options, app.WithTLS(app.SimpleTLSConfig(keypair, pool)))
 	}
 
