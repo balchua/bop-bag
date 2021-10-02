@@ -10,7 +10,7 @@ import (
 	"github.com/Rican7/retry/backoff"
 	"github.com/Rican7/retry/jitter"
 	"github.com/Rican7/retry/strategy"
-	"github.com/balchua/uncapsizable/pkg/domain"
+	"github.com/balchua/bopbag/pkg/domain"
 	"go.uber.org/zap"
 )
 

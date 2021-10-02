@@ -6,9 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/balchua/uncapsizable/pkg/applog"
-	"github.com/balchua/uncapsizable/pkg/domain"
-	"github.com/balchua/uncapsizable/pkg/infrastructure"
+	"github.com/balchua/bopbag/pkg/applog"
+	"github.com/balchua/bopbag/pkg/domain"
+	"github.com/balchua/bopbag/pkg/infrastructure"
 	"github.com/stretchr/testify/assert"
 )
 

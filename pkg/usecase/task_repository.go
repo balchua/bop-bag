@@ -1,6 +1,6 @@
 package usecase
 
-import "github.com/balchua/uncapsizable/pkg/domain"
+import "github.com/balchua/bopbag/pkg/domain"
 
 type TaskRepository interface {
 	Add(task *domain.Task) (*domain.Task, error)

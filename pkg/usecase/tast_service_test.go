@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/balchua/uncapsizable/pkg/domain"
+	"github.com/balchua/bopbag/pkg/domain"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

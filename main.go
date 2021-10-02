@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/balchua/uncapsizable/cmd"
+import "github.com/balchua/bopbag/cmd"
 
 func main() {
 	cmd.Execute()

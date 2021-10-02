@@ -3,8 +3,8 @@ package repository
 import (
 	"database/sql"
 
-	"github.com/balchua/uncapsizable/pkg/applog"
-	"github.com/balchua/uncapsizable/pkg/domain"
+	"github.com/balchua/bopbag/pkg/applog"
+	"github.com/balchua/bopbag/pkg/domain"
 	"go.uber.org/zap"
 )
 

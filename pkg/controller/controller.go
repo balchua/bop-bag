@@ -4,9 +4,9 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/balchua/uncapsizable/pkg/domain"
-	"github.com/balchua/uncapsizable/pkg/repository"
-	"github.com/balchua/uncapsizable/pkg/usecase"
+	"github.com/balchua/bopbag/pkg/domain"
+	"github.com/balchua/bopbag/pkg/repository"
+	"github.com/balchua/bopbag/pkg/usecase"
 	fiber "github.com/gofiber/fiber/v2"
 )
 

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/balchua/uncapsizable/pkg/applog"
+	"github.com/balchua/bopbag/pkg/applog"
 	"github.com/canonical/go-dqlite/app"
 	"github.com/canonical/go-dqlite/client"
 	"go.uber.org/zap"
@@ -14,7 +14,7 @@ import (
 const (
 	MAX_CONNECTION           = 5
 	MAX_IDLE_CONNECTION_TIME = 120 * time.Second
-	DB_NAME                  = "uncapsizable"
+	DB_NAME                  = "bopbag"
 )
 
 type Dqlite struct {
