@@ -15,13 +15,13 @@ const (
 	findAll    = "SELECT ID, TITLE, DETAILS, CREATED_DATE FROM TASKS"
 )
 
-type TaskRepository struct {
+type TaskRepositoryImpl struct {
 	db  Db
 	log *applog.Logger
 }
 
-func NewTaskRepository(applog *applog.Logger, db Db) (*TaskRepository, error) {
-	taskRepo := &TaskRepository{
+func NewTaskRepository(applog *applog.Logger, db Db) (*TaskRepositoryImpl, error) {
+	taskRepo := &TaskRepositoryImpl{
 		db:  db,
 		log: applog,
 	}
@@ -33,7 +33,7 @@ func NewTaskRepository(applog *applog.Logger, db Db) (*TaskRepository, error) {
 	return taskRepo, nil
 }
 
-func (t *TaskRepository) migrate() error {
+func (t *TaskRepositoryImpl) migrate() error {
 	var err error
 	if _, err = t.db.Exec(taskSchema); err != nil {
 		t.log.Log.Fatal("unable to create schema", zap.Error(err))
@@ -41,7 +41,7 @@ func (t *TaskRepository) migrate() error {
 	return err
 }
 
-func (t *TaskRepository) Add(task *domain.Task) (*domain.Task, error) {
+func (t *TaskRepositoryImpl) Add(task *domain.Task) (*domain.Task, error) {
 	var err error
 	var result sql.Result
 	if result, err = t.db.Exec(insert, task.Title, task.Details, task.CreatedDate); err != nil {
@@ -60,7 +60,7 @@ func (t *TaskRepository) Add(task *domain.Task) (*domain.Task, error) {
 	return returnTask, err
 }
 
-func (t *TaskRepository) FindById(id int64) (*domain.Task, error) {
+func (t *TaskRepositoryImpl) FindById(id int64) (*domain.Task, error) {
 	var task domain.Task
 	lg, _ := zap.NewProduction()
 	lg.Info("Id to find", zap.Int64("id", id))
@@ -73,7 +73,7 @@ func (t *TaskRepository) FindById(id int64) (*domain.Task, error) {
 
 }
 
-func (t *TaskRepository) FindAll() (*[]domain.Task, error) {
+func (t *TaskRepositoryImpl) FindAll() (*[]domain.Task, error) {
 	var tasks []domain.Task
 	lg, _ := zap.NewProduction()
 

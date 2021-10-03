@@ -5,18 +5,18 @@ import (
 	"strconv"
 
 	"github.com/balchua/bopbag/pkg/domain"
-	"github.com/balchua/bopbag/pkg/repository"
 	"github.com/balchua/bopbag/pkg/usecase"
 	fiber "github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 )
 
 type TaskController struct {
 	taskService *usecase.TaskService
 }
 
-func NewTaskController(taskRepo *repository.TaskRepository) *TaskController {
+func NewTaskController(taskRepo usecase.TaskRepository, retries uint, logger *zap.Logger) *TaskController {
 
-	ts := usecase.NewTaskService(taskRepo)
+	ts := usecase.NewTaskService(taskRepo, retries, logger)
 	return &TaskController{
 		taskService: ts,
 	}
@@ -24,7 +24,7 @@ func NewTaskController(taskRepo *repository.TaskRepository) *TaskController {
 
 func (q *TaskController) NewTask(c *fiber.Ctx) error {
 
-	ctx := context.Background()
+	ctx := context.TODO()
 	task := new(domain.Task)
 	if err := c.BodyParser(task); err != nil {
 		return fiber.NewError(fiber.StatusServiceUnavailable, "marshalling error!")
@@ -39,7 +39,8 @@ func (q *TaskController) NewTask(c *fiber.Ctx) error {
 
 func (q *TaskController) FindById(c *fiber.Ctx) error {
 	ctx := context.Background()
-	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	idStr := c.Params("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
 	}

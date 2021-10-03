@@ -26,6 +26,7 @@ import (
 	"github.com/balchua/bopbag/pkg/controller"
 	"github.com/balchua/bopbag/pkg/infrastructure"
 	"github.com/balchua/bopbag/pkg/repository"
+	"github.com/balchua/bopbag/pkg/usecase"
 	"github.com/canonical/go-dqlite/client"
 	fiber "github.com/gofiber/fiber/v2"
 	"github.com/spf13/cobra"
@@ -45,7 +46,7 @@ var (
 	join        []string
 	port        int
 	dbAddress   string
-	taskRepo    *repository.TaskRepository
+	taskRepo    usecase.TaskRepository
 	clusterRepo *repository.ClusterRepository
 	applogger   *applog.Logger
 	enableTls   bool
@@ -63,8 +64,9 @@ func init() {
 
 func startAppServer() {
 	lg, _ := zap.NewProduction()
+	retries := 5000
 
-	taskController := controller.NewTaskController(taskRepo)
+	taskController := controller.NewTaskController(taskRepo, uint(retries), lg)
 	clusterController := controller.NewClusterController(clusterRepo)
 
 	// Fiber instance

@@ -1,15 +1,20 @@
-# BopBag
+# Bop Bag
+
+The application is inspired by those toys used by kids as a punching bags.  These toys do not tip over.
+
+When one tries to hold them down, the toy immediately spring back up the moment one releases their hands on the toys.
 
 What is a bop bag?
 
 You can find several bop bag toys in [Amazon](https://www.amazon.com/bop-bag/s?k=bop+bag)
 
-A service that can sustain failures with low ops.
+A application that can sustain failures with very low ops.
 
+This is a demonstration of a very low ops highly available application.
 
 ## Goal
 * Demonstrate an application which can self heal.
-* Embed raft enabled high availability data store.
+* Embed raft enabled highly available data store.
 * Simple enough to be understood.
 * Simple to join a node to the cluster.
 * Must be able to demonstrate the auto cluster realignment when a node goes down.
@@ -66,7 +71,11 @@ The implementation will be a simple go based called `TaskRepository`.
 
 ### Joining the cluster
 
-The joining process must be automatic.
+Joining or forming a cluster must be easy.
+
+### Leaving the cluster
+
+TODO.
 
 ## Build
 

@@ -16,17 +16,20 @@ import (
 
 type TaskService struct {
 	taskRepo TaskRepository
+	lg       *zap.Logger
+	retries  uint
 }
 
-func NewTaskService(repo TaskRepository) *TaskService {
+func NewTaskService(repo TaskRepository, retries uint, lg *zap.Logger) *TaskService {
 	return &TaskService{
 		taskRepo: repo,
+		lg:       lg,
+		retries:  retries,
 	}
 
 }
 
 func (t *TaskService) CreateTask(ctx context.Context, task *domain.Task) (*domain.Task, error) {
-	lg, _ := zap.NewProduction()
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(20)*time.Millisecond)
 	defer cancel()
 
@@ -38,13 +41,16 @@ func (t *TaskService) CreateTask(ctx context.Context, task *domain.Task) (*domai
 		action := func(attempt uint) error {
 			var addErr error
 			newTask, addErr = t.taskRepo.Add(task)
-			lg.Info("Create task Attempt", zap.Uint("attempt", attempt))
+			t.lg.Info("Create task Attempt", zap.Uint("attempt", attempt))
+			if addErr != nil {
+				t.lg.Info("Unable to add the task", zap.Error(addErr))
+			}
 			return addErr
 		}
 
 		err := retry.Retry(
 			action,
-			strategy.Limit(5000),
+			strategy.Limit(t.retries),
 			strategy.BackoffWithJitter(
 				backoff.BinaryExponential(10*time.Millisecond),
 				jitter.Deviation(random, 0.5),
