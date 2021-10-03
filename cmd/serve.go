@@ -16,8 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"strconv"
