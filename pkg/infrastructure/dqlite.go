@@ -1,7 +1,6 @@
 package infrastructure
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -131,24 +130,21 @@ func (d *Dqlite) QueryRow(query string, args ...interface{}) *sql.Row {
 	return d.db.QueryRow(query, args...)
 }
 
-func (d *Dqlite) GetClusterInfo() (string, error) {
+func (d *Dqlite) GetClusterInfo() ([]byte, error) {
 	ctx := context.Background()
 	cli, err := d.dqlite.Client(ctx)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	cluster, err := cli.Cluster(ctx)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	result := ""
+
 	data, err := json.Marshal(cluster)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	var indented bytes.Buffer
-	json.Indent(&indented, data, "", "\t")
-	result = string(indented.Bytes())
 
-	return result, nil
+	return data, nil
 }

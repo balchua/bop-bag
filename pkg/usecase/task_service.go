@@ -10,17 +10,18 @@ import (
 	"github.com/Rican7/retry/backoff"
 	"github.com/Rican7/retry/jitter"
 	"github.com/Rican7/retry/strategy"
+	"github.com/balchua/bopbag/pkg/applog"
 	"github.com/balchua/bopbag/pkg/domain"
 	"go.uber.org/zap"
 )
 
 type TaskService struct {
 	taskRepo TaskRepository
-	lg       *zap.Logger
+	lg       *applog.Logger
 	retries  uint
 }
 
-func NewTaskService(repo TaskRepository, retries uint, lg *zap.Logger) *TaskService {
+func NewTaskService(repo TaskRepository, retries uint, lg *applog.Logger) *TaskService {
 	return &TaskService{
 		taskRepo: repo,
 		lg:       lg,
@@ -41,9 +42,9 @@ func (t *TaskService) CreateTask(ctx context.Context, task *domain.Task) (*domai
 		action := func(attempt uint) error {
 			var addErr error
 			newTask, addErr = t.taskRepo.Add(task)
-			t.lg.Info("Create task Attempt", zap.Uint("attempt", attempt))
+			t.lg.Log.Info("Create task Attempt", zap.Uint("attempt", attempt))
 			if addErr != nil {
-				t.lg.Info("Unable to add the task", zap.Error(addErr))
+				t.lg.Log.Info("Unable to add the task", zap.Error(addErr))
 			}
 			return addErr
 		}

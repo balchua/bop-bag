@@ -42,14 +42,20 @@ var (
 		Long:  `Starts the application along with its database`,
 		Run:   start,
 	}
-	dbPath      string
-	join        []string
-	port        int
-	dbAddress   string
-	taskRepo    usecase.TaskRepository
-	clusterRepo *repository.ClusterRepository
-	applogger   *applog.Logger
-	enableTls   bool
+	dbPath         string
+	join           []string
+	port           int
+	dbAddress      string
+	dqliteInst     *infrastructure.Dqlite
+	taskRepo       *repository.TaskRepositoryImpl
+	clusterRepo    *repository.ClusterRepository
+	taskService    *usecase.TaskService
+	taskController *controller.TaskController
+
+	clusterController *controller.ClusterController
+	clusterService    *usecase.ClusterService
+	applogger         *applog.Logger
+	enableTls         bool
 )
 
 func init() {
@@ -62,13 +68,18 @@ func init() {
 
 }
 
-func startAppServer() {
-	lg, _ := zap.NewProduction()
+func startWiring() {
 	retries := 5000
+	taskRepo, _ = repository.NewTaskRepository(applogger, dqliteInst)
+	taskService = usecase.NewTaskService(taskRepo, uint(retries), applogger)
+	clusterRepo = repository.NewClusterRepository(dqliteInst)
+	clusterService = usecase.NewClusterService(clusterRepo, applogger)
+	taskController = controller.NewTaskController(taskService)
+	clusterController = controller.NewClusterController(clusterService)
 
-	taskController := controller.NewTaskController(taskRepo, uint(retries), lg)
-	clusterController := controller.NewClusterController(clusterRepo)
+}
 
+func startAppServer() {
 	// Fiber instance
 	app := fiber.New()
 
@@ -80,7 +91,7 @@ func startAppServer() {
 
 	appErr := app.Listen(":" + strconv.Itoa(port))
 	if appErr != nil {
-		lg.Fatal("unable to start the app server")
+		applogger.Log.Fatal("unable to start the app server")
 	}
 }
 
@@ -89,20 +100,20 @@ func dqliteLog(l client.LogLevel, format string, a ...interface{}) {
 }
 
 func startDqLite() {
-	dqliteInst, err := infrastructure.NewDqlite(applogger, dbPath, dbAddress, join, enableTls)
+	var err error
+	dqliteInst, err = infrastructure.NewDqlite(applogger, dbPath, dbAddress, join, enableTls)
 
 	if err != nil {
-		applogger.Log.Sugar().Fatalf("unable to instantiate dqlite %v", err)
+		applogger.Log.Fatal("unable to instantiate dqlite", zap.Error(err))
 	}
 
-	taskRepo, _ = repository.NewTaskRepository(applogger, dqliteInst)
-	clusterRepo = repository.NewClusterRepository(dqliteInst)
 }
 
 func start(cmd *cobra.Command, args []string) {
 
 	applogger = applog.NewLogger()
 	startDqLite()
+	startWiring()
 	startAppServer()
 
 	ch := make(chan os.Signal)

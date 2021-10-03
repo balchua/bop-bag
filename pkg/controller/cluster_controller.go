@@ -1,25 +1,24 @@
 package controller
 
 import (
-	"github.com/balchua/bopbag/pkg/repository"
 	fiber "github.com/gofiber/fiber/v2"
 )
 
 type ClusterController struct {
-	repo *repository.ClusterRepository
+	service ClusterService
 }
 
-func NewClusterController(clusterRepo *repository.ClusterRepository) *ClusterController {
+func NewClusterController(clusterService ClusterService) *ClusterController {
 	return &ClusterController{
-		repo: clusterRepo,
+		service: clusterService,
 	}
 }
 func (cl *ClusterController) ShowCluster(c *fiber.Ctx) error {
 
-	clusterInfo, err := cl.repo.ClusterInfo()
+	clusterInfo, err := cl.service.GetClusterInfo()
 
 	if err != nil {
 		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
 	}
-	return c.Send([]byte(clusterInfo))
+	return c.JSON(clusterInfo)
 }

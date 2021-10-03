@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"net/http/httptest"
 	"strings"
@@ -10,24 +11,23 @@ import (
 	fiber "github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"go.uber.org/zap"
 )
 
-type MockTaskRepository struct {
+type MockTaskService struct {
 	mock.Mock
 }
 
-func (m *MockTaskRepository) Add(task *domain.Task) (*domain.Task, error) {
-	args := m.Called(task)
+func (m *MockTaskService) CreateTask(ctx context.Context, task *domain.Task) (*domain.Task, error) {
+	args := m.Called(ctx, task)
 	return args.Get(0).(*domain.Task), args.Error(1)
 }
 
-func (m *MockTaskRepository) FindById(id int64) (*domain.Task, error) {
-	args := m.Called(id)
+func (m *MockTaskService) GetTaskById(ctx context.Context, id int64) (*domain.Task, error) {
+	args := m.Called(ctx, id)
 	return args.Get(0).(*domain.Task), args.Error(1)
 }
 
-func (m *MockTaskRepository) FindAll() (*[]domain.Task, error) {
+func (m *MockTaskService) GetAllTasks(ctx context.Context) (*[]domain.Task, error) {
 	args := m.Called()
 	return args.Get(0).(*[]domain.Task), args.Error(1)
 }
@@ -37,15 +37,11 @@ func setupApp() *fiber.App {
 	return app
 }
 
-func TestInsertNewTask(t *testing.T) {
-	logger, logerr := zap.NewProduction()
-	if logerr != nil {
-		t.Fatal(logerr)
-	}
+func TestMustReturnAllTasks(t *testing.T) {
 	app := setupApp()
 
 	// create an instance of our test object
-	mockTaskRepo := new(MockTaskRepository)
+	mockTaskService := new(MockTaskService)
 
 	var tasks []domain.Task
 
@@ -54,9 +50,10 @@ func TestInsertNewTask(t *testing.T) {
 	}
 	tasks = append(tasks, task)
 
-	mockTaskRepo.On("FindAll").Return(&tasks, nil)
+	mockTaskService.On("GetAllTasks",
+		mock.Anything).Return(&tasks, nil)
 
-	controller := NewTaskController(mockTaskRepo, 1, logger)
+	controller := NewTaskController(mockTaskService)
 
 	app.Get("/api/v1/tasks", controller.FindAll)
 	req := httptest.NewRequest("GET", "/api/v1/tasks", nil)
@@ -66,22 +63,19 @@ func TestInsertNewTask(t *testing.T) {
 
 }
 
-func TestMustNotAllowInsertNewTask(t *testing.T) {
-	logger, logerr := zap.NewProduction()
-	if logerr != nil {
-		t.Fatal(logerr)
-	}
+func TestMustReturnErrorWhenGetAllTaskFail(t *testing.T) {
+
 	app := setupApp()
 	// create an instance of our test object
-	mockTaskRepo := new(MockTaskRepository)
+	mockTaskService := new(MockTaskService)
 
 	var tasks []domain.Task
 
 	tasks = make([]domain.Task, 0) //append(tasks, task)
 
-	mockTaskRepo.On("FindAll").Return(&tasks, fmt.Errorf("db error"))
+	mockTaskService.On("GetAllTasks", mock.Anything).Return(&tasks, fmt.Errorf("db error"))
 
-	controller := NewTaskController(mockTaskRepo, 1, logger)
+	controller := NewTaskController(mockTaskService)
 
 	app.Get("/api/v1/tasks", controller.FindAll)
 	req := httptest.NewRequest("GET", "/api/v1/tasks", nil)
@@ -91,19 +85,16 @@ func TestMustNotAllowInsertNewTask(t *testing.T) {
 }
 
 func TestMustBeAbleToFindById(t *testing.T) {
-	logger, logerr := zap.NewProduction()
-	if logerr != nil {
-		t.Fatal(logerr)
-	}
+
 	task := &domain.Task{
 		Id: 1234,
 	}
 	// create an instance of our test object
-	mockTaskRepo := new(MockTaskRepository)
+	mockTaskService := new(MockTaskService)
 
-	mockTaskRepo.On("FindById", int64(1234)).Return(task, nil)
+	mockTaskService.On("GetTaskById", mock.Anything, int64(1234)).Return(task, nil)
 
-	controller := NewTaskController(mockTaskRepo, 1, logger)
+	controller := NewTaskController(mockTaskService)
 	app := setupApp()
 	app.Get("/api/v1/task/:id", controller.FindById)
 
@@ -116,19 +107,16 @@ func TestMustBeAbleToFindById(t *testing.T) {
 }
 
 func TestFindInvalidId(t *testing.T) {
-	logger, logerr := zap.NewProduction()
-	if logerr != nil {
-		t.Fatal(logerr)
-	}
+
 	task := &domain.Task{
 		Id: 1234,
 	}
 	// create an instance of our test object
-	mockTaskRepo := new(MockTaskRepository)
+	mockTaskService := new(MockTaskService)
 
-	mockTaskRepo.On("FindById", 1234).Return(task, nil)
+	mockTaskService.On("GetTaskById", mock.Anything, 1234).Return(task, nil)
 
-	controller := NewTaskController(mockTaskRepo, 1, logger)
+	controller := NewTaskController(mockTaskService)
 	app := setupApp()
 	app.Get("/api/v1/task/:id", controller.FindById)
 
@@ -141,17 +129,14 @@ func TestFindInvalidId(t *testing.T) {
 }
 
 func TestUnableToFindId(t *testing.T) {
-	logger, logerr := zap.NewProduction()
-	if logerr != nil {
-		t.Fatal(logerr)
-	}
+
 	task := &domain.Task{}
 	// create an instance of our test object
-	mockTaskRepo := new(MockTaskRepository)
+	mockTaskService := new(MockTaskService)
 
-	mockTaskRepo.On("FindById", int64(1234)).Return(task, fmt.Errorf("database error"))
+	mockTaskService.On("GetTaskById", mock.Anything, int64(1234)).Return(task, fmt.Errorf("database error"))
 
-	controller := NewTaskController(mockTaskRepo, 1, logger)
+	controller := NewTaskController(mockTaskService)
 	app := setupApp()
 	app.Get("/api/v1/task/:id", controller.FindById)
 
@@ -164,10 +149,7 @@ func TestUnableToFindId(t *testing.T) {
 }
 
 func TestMustBeAbleToInsertATask(t *testing.T) {
-	logger, logerr := zap.NewProduction()
-	if logerr != nil {
-		t.Fatal(logerr)
-	}
+
 	// prepare the mock
 	task := &domain.Task{
 		Id:          0,
@@ -175,9 +157,9 @@ func TestMustBeAbleToInsertATask(t *testing.T) {
 		Details:     "Here you go, this is what i should do",
 		CreatedDate: "2021-10-25",
 	}
-	mockTaskRepo := new(MockTaskRepository)
-	mockTaskRepo.On("Add", task).Return(task, nil)
-	controller := NewTaskController(mockTaskRepo, 1, logger)
+	mockTaskService := new(MockTaskService)
+	mockTaskService.On("CreateTask", mock.Anything, task).Return(task, nil)
+	controller := NewTaskController(mockTaskService)
 
 	//set up fiber
 	app := setupApp()
@@ -194,10 +176,6 @@ func TestMustBeAbleToInsertATask(t *testing.T) {
 }
 
 func TestMustFailWhenTaskJsonIsInvalid(t *testing.T) {
-	logger, logerr := zap.NewProduction()
-	if logerr != nil {
-		t.Fatal(logerr)
-	}
 	// prepare the mock
 	task := &domain.Task{
 		Id:          0,
@@ -205,9 +183,9 @@ func TestMustFailWhenTaskJsonIsInvalid(t *testing.T) {
 		Details:     "Here you go, this is what i should do",
 		CreatedDate: "2021-10-25",
 	}
-	mockTaskRepo := new(MockTaskRepository)
-	mockTaskRepo.On("Add", task).Return(task, fmt.Errorf("json parse error"))
-	controller := NewTaskController(mockTaskRepo, 1, logger)
+	mockTaskService := new(MockTaskService)
+	mockTaskService.On("CreateTask", mock.Anything, task).Return(task, fmt.Errorf("json parse error"))
+	controller := NewTaskController(mockTaskService)
 
 	//set up fiber
 	app := setupApp()
@@ -224,10 +202,6 @@ func TestMustFailWhenTaskJsonIsInvalid(t *testing.T) {
 }
 
 func TestMustFailWhenUnableToInsertATask(t *testing.T) {
-	logger, logerr := zap.NewProduction()
-	if logerr != nil {
-		t.Fatal(logerr)
-	}
 	// prepare the mock
 	task := &domain.Task{
 		Id:          0,
@@ -235,9 +209,9 @@ func TestMustFailWhenUnableToInsertATask(t *testing.T) {
 		Details:     "Here you go, this is what i should do",
 		CreatedDate: "2021-10-25",
 	}
-	mockTaskRepo := new(MockTaskRepository)
-	mockTaskRepo.On("Add", task).Return(task, fmt.Errorf("database error"))
-	controller := NewTaskController(mockTaskRepo, 1, logger)
+	mockTaskService := new(MockTaskService)
+	mockTaskService.On("CreateTask", mock.Anything, task).Return(task, fmt.Errorf("database error"))
+	controller := NewTaskController(mockTaskService)
 
 	//set up fiber
 	app := setupApp()
@@ -250,6 +224,5 @@ func TestMustFailWhenUnableToInsertATask(t *testing.T) {
 
 	// Verify, if the status code is as expected
 	assert.Equalf(t, 503, resp.StatusCode, "New task")
-	logger.Info("status mesage", zap.String("msg", resp.Status))
 
 }

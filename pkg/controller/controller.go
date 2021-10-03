@@ -5,20 +5,17 @@ import (
 	"strconv"
 
 	"github.com/balchua/bopbag/pkg/domain"
-	"github.com/balchua/bopbag/pkg/usecase"
 	fiber "github.com/gofiber/fiber/v2"
-	"go.uber.org/zap"
 )
 
 type TaskController struct {
-	taskService *usecase.TaskService
+	taskService TaskService
 }
 
-func NewTaskController(taskRepo usecase.TaskRepository, retries uint, logger *zap.Logger) *TaskController {
+func NewTaskController(taskService TaskService) *TaskController {
 
-	ts := usecase.NewTaskService(taskRepo, retries, logger)
 	return &TaskController{
-		taskService: ts,
+		taskService: taskService,
 	}
 }
 

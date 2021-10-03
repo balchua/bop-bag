@@ -1,6 +1,8 @@
 package repository
 
-import "github.com/balchua/bopbag/pkg/applog"
+import (
+	"github.com/balchua/bopbag/pkg/applog"
+)
 
 type ClusterRepository struct {
 	db  Db
@@ -13,6 +15,10 @@ func NewClusterRepository(db Db) *ClusterRepository {
 	}
 }
 
-func (c *ClusterRepository) ClusterInfo() (string, error) {
-	return c.db.GetClusterInfo()
+func (c *ClusterRepository) ClusterInfo() ([]byte, error) {
+	clusterInfoInBytes, err := c.db.GetClusterInfo()
+	if err != nil {
+		return nil, err
+	}
+	return clusterInfoInBytes, nil
 }

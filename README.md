@@ -123,11 +123,11 @@ First node
 Second node
 
 ```
-./bopbag serve --db /tmp/dbPath2 --port 8081 --dbAddress localhost:9001 --join 0.0.0.0:9000
+./bopbag serve --db /tmp/dbPath2 --port 8081 --dbAddress norse:9001 --join norse:9000
 ```
 
 Third node
 
 ```
-./bopbag serve --db /tmp/dbPath3/ --port 8082 --dbAddress  localhost:9003 --join 0.0.0.0:9000
+./bopbag serve --db /tmp/dbPath3/ --port 8082 --dbAddress  norse:9003 --join norse:9000
 ```

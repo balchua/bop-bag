@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/balchua/bopbag/pkg/applog"
 	"github.com/balchua/bopbag/pkg/domain"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"go.uber.org/zap"
 )
 
 /*
@@ -33,10 +33,7 @@ func (m *MockedTaskRepository) FindAll() (*[]domain.Task, error) {
 	return args.Get(0).(*[]domain.Task), args.Error(1)
 }
 func TestSuccessfulTaskCreation(t *testing.T) {
-	logger, logerr := zap.NewProduction()
-	if logerr != nil {
-		t.Fatal(logerr)
-	}
+	logger := applog.NewLogger()
 	assert := assert.New(t)
 
 	// create an instance of our test object
@@ -60,10 +57,7 @@ func TestSuccessfulTaskCreation(t *testing.T) {
 }
 
 func TestShoudReturnTaskWhenIdIsPassed(t *testing.T) {
-	logger, logerr := zap.NewProduction()
-	if logerr != nil {
-		t.Fatal(logerr)
-	}
+	logger := applog.NewLogger()
 	assert := assert.New(t)
 
 	// create an instance of our test object
@@ -86,10 +80,7 @@ func TestShoudReturnTaskWhenIdIsPassed(t *testing.T) {
 }
 
 func TestShoudReturnAllTasks(t *testing.T) {
-	logger, logerr := zap.NewProduction()
-	if logerr != nil {
-		t.Fatal(logerr)
-	}
+	logger := applog.NewLogger()
 	assert := assert.New(t)
 	// create an instance of our test object
 	mockTaskRepo := new(MockedTaskRepository)
