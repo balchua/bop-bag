@@ -95,10 +95,6 @@ func startAppServer() {
 	}
 }
 
-func dqliteLog(l client.LogLevel, format string, a ...interface{}) {
-	log.Printf(fmt.Sprintf("%s\n", format), a...)
-}
-
 func startDqLite() {
 	var err error
 	dqliteInst, err = infrastructure.NewDqlite(applogger, dbPath, dbAddress, join, enableTls)
