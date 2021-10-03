@@ -37,7 +37,7 @@ func TestStartApplication(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	enableTls = true
+	enableTls = false
 	dbAddress = "127.0.0.1:50000"
 	dbPath = dir
 	port = 8000
