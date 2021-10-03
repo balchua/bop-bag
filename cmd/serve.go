@@ -27,7 +27,6 @@ import (
 	"github.com/balchua/bopbag/pkg/infrastructure"
 	"github.com/balchua/bopbag/pkg/repository"
 	"github.com/balchua/bopbag/pkg/usecase"
-	"github.com/canonical/go-dqlite/client"
 	fiber "github.com/gofiber/fiber/v2"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
