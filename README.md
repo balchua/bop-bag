@@ -1,5 +1,9 @@
 # Bop Bag
 
+[![Build, Test and coverage](https://github.com/balchua/bop-bag/actions/workflows/ci.yml/badge.svg)](https://github.com/balchua/bop-bag/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/balchua/bop-bag/branch/main/graph/badge.svg?token=S9UITN8L61)](https://codecov.io/gh/balchua/bop-bag)
+
+
 The application is inspired by those toys used by kids as a punching bags.  These toys do not tip over.
 
 When one tries to hold them down, the toy immediately spring back up the moment one releases their hands on the toys.
