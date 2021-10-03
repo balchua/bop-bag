@@ -8,9 +8,9 @@ What is a bop bag?
 
 You can find several bop bag toys in [Amazon](https://www.amazon.com/bop-bag/s?k=bop+bag)
 
-A application that can sustain failures with very low ops.
+A application that can tolerate node failures.
 
-This is a demonstration of a very low ops highly available application.
+This is a demonstration of a very low ops and highly available application.
 
 ## Goal
 * Demonstrate an application which can self heal.
@@ -50,24 +50,31 @@ The implementation will be a simple go based called `TaskRepository`.
 
 - [X] GET all tasks
   
-  * Endpoint: `/tasks/`
+  * Endpoint: `/api/v1/tasks/`
   * Method : `GET`
  
 - [X] GET a task
-  * Endpoint: `/task/{id}`
+  * Endpoint: `/api/v1/task/{id}`
   * Method: `GET`
  
 - [X] Insert a task
-  * Endpoint `/task`
-  * Method: `PUT`
+  * Endpoint `/api/v1/task`
+  * Method: `POST`
 
 - [ ] Update a task
-  * Endpoint: `/task/{id}`
+  * Endpoint: `/api/v1/task/{id}`
   * Method: `PUT`
 
 - [ ] Delete a task
-  * Endpoint: `/task/{id}`
+  * Endpoint: `/api/v1/task/{id}`
   * Method: `DELETE`
+
+- [X] Shows the cluster information
+  * Endpoint: `/api/v1/clusterInfo`
+  * Method: `GET`
+
+Sample output of Cluster Info
+
 
 ### Joining the cluster
 
@@ -131,3 +138,26 @@ Third node
 ```
 ./bopbag serve --db /tmp/dbPath3/ --port 8082 --dbAddress  norse:9003 --join norse:9000
 ```
+
+Show cluster information `/api/v1/clusterInfo`
+
+```yaml
+[
+  {
+    "ID": 3297041220608546300,
+    "Address": "norse:9000",
+    "Role": 0
+  },
+  {
+    "ID": 7997991560008497000,
+    "Address": "norse:9001",
+    "Role": 0
+  },
+  {
+    "ID": 11590821130369819000,
+    "Address": "norse:9003",
+    "Role": 0
+  }
+]
+```
+
