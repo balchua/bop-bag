@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/balchua/bopbag/pkg/applog"
@@ -56,6 +57,52 @@ func TestSuccessfulTaskCreation(t *testing.T) {
 	assert.Nil(err)
 }
 
+func TestFailTaskCreation(t *testing.T) {
+	logger := applog.NewLogger()
+	assert := assert.New(t)
+
+	// create an instance of our test object
+	mockTaskRepo := new(MockedTaskRepository)
+	task := &domain.Task{
+		Title:       "test",
+		Details:     "test",
+		CreatedDate: "20210926",
+	}
+	newTask := task
+	newTask.Id = 1
+
+	// setup expectations
+	mockTaskRepo.On("Add", task).Return(newTask, fmt.Errorf("database error"))
+
+	service := NewTaskService(mockTaskRepo, 1, logger)
+
+	_, err := service.CreateTask(context.Background(), task)
+	assert.NotNil(err)
+}
+
+func TestInvalidTaskCreation(t *testing.T) {
+	logger := applog.NewLogger()
+	assert := assert.New(t)
+
+	// create an instance of our test object
+	mockTaskRepo := new(MockedTaskRepository)
+	task := &domain.Task{
+		Title:       "",
+		Details:     "test",
+		CreatedDate: "20210926",
+	}
+	newTask := task
+	newTask.Id = 1
+
+	// setup expectations
+	mockTaskRepo.On("Add", task).Return(newTask, nil)
+
+	service := NewTaskService(mockTaskRepo, 1, logger)
+
+	_, err := service.CreateTask(context.Background(), task)
+	assert.NotNil(err)
+}
+
 func TestShoudReturnTaskWhenIdIsPassed(t *testing.T) {
 	logger := applog.NewLogger()
 	assert := assert.New(t)
@@ -77,6 +124,28 @@ func TestShoudReturnTaskWhenIdIsPassed(t *testing.T) {
 	response, err := service.GetTaskById(context.Background(), 999)
 	assert.NotNil(response)
 	assert.Nil(err)
+}
+
+func TestFailFindById(t *testing.T) {
+	logger := applog.NewLogger()
+	assert := assert.New(t)
+
+	// create an instance of our test object
+	mockTaskRepo := new(MockedTaskRepository)
+	newTask := &domain.Task{
+		Id:          999,
+		Title:       "test",
+		Details:     "test",
+		CreatedDate: "20210926",
+	}
+
+	// setup expectations
+	mockTaskRepo.On("FindById", int64(999)).Return(newTask, fmt.Errorf("database error"))
+
+	service := NewTaskService(mockTaskRepo, 1, logger)
+
+	_, err := service.GetTaskById(context.Background(), 999)
+	assert.NotNil(err)
 }
 
 func TestShoudReturnAllTasks(t *testing.T) {
@@ -106,4 +175,23 @@ func TestShoudReturnAllTasks(t *testing.T) {
 	response, err := service.GetAllTasks(context.Background())
 	assert.Equal(len(*response), 2)
 	assert.Nil(err)
+}
+
+func TestMustFailGetAllTasks(t *testing.T) {
+	logger := applog.NewLogger()
+	assert := assert.New(t)
+	// create an instance of our test object
+	mockTaskRepo := new(MockedTaskRepository)
+
+	var tasks *[]domain.Task
+	_tasks := make([]domain.Task, 2)
+
+	tasks = &_tasks
+	// setup expectations
+	mockTaskRepo.On("FindAll").Return(tasks, fmt.Errorf("database error"))
+
+	service := NewTaskService(mockTaskRepo, 1, logger)
+
+	_, err := service.GetAllTasks(context.Background())
+	assert.NotNil(err)
 }

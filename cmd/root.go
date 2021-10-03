@@ -63,7 +63,7 @@ func initConfig() {
 		// Search config in home directory with name ".uncapsizable" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".uncapsizable")
+		viper.SetConfigName(".bopbag")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

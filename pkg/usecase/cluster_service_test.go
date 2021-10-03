@@ -68,3 +68,21 @@ func TestMustFailIfUnSuccessfulCall(t *testing.T) {
 	assert.Nil(t, response)
 	assert.NotNil(t, err)
 }
+
+func TestMustFailIfInvalidJSON(t *testing.T) {
+	logger := applog.NewLogger()
+	mockClusterRepo := new(MockClusterRepository)
+	data := []byte(`[
+		{
+		  "ID": 3297041220608546300,
+		  "Address": "norse:9000",
+		  "Role": 0
+		}
+	  `)
+	mockClusterRepo.On("ClusterInfo").Return(data, nil)
+
+	service := NewClusterService(mockClusterRepo, logger)
+
+	_, err := service.GetClusterInfo()
+	assert.NotNil(t, err)
+}
