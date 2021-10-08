@@ -16,8 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"strconv"
@@ -27,7 +25,6 @@ import (
 	"github.com/balchua/bopbag/pkg/infrastructure"
 	"github.com/balchua/bopbag/pkg/repository"
 	"github.com/balchua/bopbag/pkg/usecase"
-	"github.com/canonical/go-dqlite/client"
 	fiber "github.com/gofiber/fiber/v2"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -95,10 +92,6 @@ func startAppServer() {
 	if appErr != nil {
 		applogger.Log.Fatal("unable to start the app server")
 	}
-}
-
-func dqliteLog(l client.LogLevel, format string, a ...interface{}) {
-	log.Printf(fmt.Sprintf("%s\n", format), a...)
 }
 
 func startDqLite() {
