@@ -23,7 +23,7 @@ func TestMustRetrieveClusterInfo(t *testing.T) {
 	}
 	defer os.Remove(dir)
 	dbAddress := "127.0.0.1:50000"
-	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil, false)
+	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil, false, "")
 	defer dqliteInst.CloseDqlite()
 
 	repo := NewClusterRepository(dqliteInst)

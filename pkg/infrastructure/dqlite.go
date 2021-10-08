@@ -31,7 +31,7 @@ type Dqlite struct {
 	db      *sql.DB
 }
 
-func NewDqlite(log *applog.Logger, dbPath string, dbAddress string, join []string, enableTls bool) (*Dqlite, error) {
+func NewDqlite(log *applog.Logger, dbPath string, dbAddress string, join []string, enableTls bool, certsPath string) (*Dqlite, error) {
 
 	var dqlite *app.App
 	var err error
@@ -48,8 +48,8 @@ func NewDqlite(log *applog.Logger, dbPath string, dbAddress string, join []strin
 
 	if enableTls {
 		// Load the TLS certificates.
-		crt := filepath.Join(dbPath, "cluster.crt")
-		key := filepath.Join(dbPath, "cluster.key")
+		crt := filepath.Join(certsPath, "cluster.crt")
+		key := filepath.Join(certsPath, "cluster.key")
 
 		keypair, err := tls.LoadX509KeyPair(crt, key)
 		if err != nil {

@@ -124,6 +124,11 @@ export CGO_LDFLAGS_ALLOW="-Wl,-z,now"
 go build .
 ```
 
+Run unit test
+```
+go test -p=1 --coverpkg=./... -coverprofile=cover.out ./...
+```
+
 ### Starting the nodes on local machine
 
 First node

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/balchua/bopbag/pkg/applog"
+	_ "github.com/balchua/bopbag/pkg/test_util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,10 +34,16 @@ func isOpened(host string, port int) bool {
 
 func TestStartApplication(t *testing.T) {
 	applogger = applog.NewLogger()
+	// copy the certs
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
 	dir, err := ioutil.TempDir("/tmp/", "tempdb")
 	if err != nil {
 		log.Fatal(err)
 	}
+	certsPath = path + "/default-certs/"
 	enableTls = true
 	dbAddress = "127.0.0.1:50000"
 	dbPath = dir

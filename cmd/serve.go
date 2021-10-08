@@ -43,6 +43,7 @@ var (
 		Run:   start,
 	}
 	dbPath         string
+	certsPath      string
 	join           []string
 	port           int
 	dbAddress      string
@@ -65,6 +66,7 @@ func init() {
 	serveCmd.PersistentFlags().IntVar(&port, "port", 8000, "Application web server port")
 	serveCmd.PersistentFlags().StringVar(&dbAddress, "dbAddress", "localhost:9000", "the database port ex. localhost:9000")
 	serveCmd.PersistentFlags().BoolVar(&enableTls, "enableTls", true, "Enable secure mode")
+	serveCmd.PersistentFlags().StringVar(&certsPath, "certs", "./", "Path to dqlite certificates")
 
 }
 
@@ -101,7 +103,7 @@ func dqliteLog(l client.LogLevel, format string, a ...interface{}) {
 
 func startDqLite() {
 	var err error
-	dqliteInst, err = infrastructure.NewDqlite(applogger, dbPath, dbAddress, join, enableTls)
+	dqliteInst, err = infrastructure.NewDqlite(applogger, dbPath, dbAddress, join, enableTls, certsPath)
 
 	if err != nil {
 		applogger.Log.Fatal("unable to instantiate dqlite", zap.Error(err))
