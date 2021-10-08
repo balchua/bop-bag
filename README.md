@@ -97,7 +97,7 @@ Assume that you have local registry running at `localhost:32000`
 Build the base image
 
 ```shell
-docker build -t localhost:32000/dqlite-base:1.0.0
+docker build -f Dockerfile.base -t localhost:32000/dqlite-base:1.9.0 .
 ```
 
 Building the app 

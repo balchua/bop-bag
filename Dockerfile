@@ -1,4 +1,4 @@
-FROM localhost:32000/dqlite-base:1.0.0
+FROM localhost:32000/dqlite-base:1.9.0
 ENV CGO_LDFLAGS_ALLOW="-Wl,-z,now"
 WORKDIR /app
 
@@ -7,6 +7,7 @@ COPY go.sum ./
 
 RUN go mod download
 COPY cmd/ cmd/
+COPY pkg/ pkg/
 COPY *.go ./
 
 RUN go build .
