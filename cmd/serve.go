@@ -87,6 +87,7 @@ func startAppServer() {
 	app.Get("/api/v1/tasks", taskController.FindAll)
 	app.Post("/api/v1/task", taskController.NewTask)
 	app.Get("/api/v1/clusterInfo", clusterController.ShowCluster)
+	app.Post("/api/v1/node/:nodeId", clusterController.RemoveNode)
 
 	appErr := app.Listen(":" + strconv.Itoa(port))
 	if appErr != nil {

@@ -133,6 +133,7 @@ func (d *Dqlite) QueryRow(query string, args ...interface{}) *sql.Row {
 func (d *Dqlite) GetClusterInfo() ([]byte, error) {
 	ctx := context.Background()
 	cli, err := d.dqlite.Client(ctx)
+
 	if err != nil {
 		return nil, err
 	}
@@ -147,4 +148,54 @@ func (d *Dqlite) GetClusterInfo() ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+func (d *Dqlite) RemoveNode(address string) (string, error) {
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
+
+	defer cancel()
+	cli, err := d.dqlite.Leader(ctx)
+	if err != nil {
+		return "", err
+	}
+	cluster, err := cli.Cluster(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	for _, node := range cluster {
+		if node.Address != address {
+			continue
+		}
+		//ignore error returned by dqlite
+		err := cli.Remove(ctx, node.ID)
+		if err != nil {
+			d.log.Log.Sugar().Errorf("Error while removing a node %v", zap.Error(err))
+		}
+		return address, nil
+	}
+	return "", fmt.Errorf("no node has address %q", address)
+}
+
+func (d *Dqlite) Leader() (string, error) {
+	var leader *client.NodeInfo
+	var err error
+	var cli *client.Client
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
+
+	defer cancel()
+
+	cli, err = d.dqlite.Leader(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	leader, err = cli.Leader(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	d.log.Log.Sugar().Infof("Current Leader %s", leader.Address)
+	return leader.Address, nil
+
 }

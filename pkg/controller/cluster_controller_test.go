@@ -21,6 +21,11 @@ func (m *MockClusterService) GetClusterInfo() ([]domain.ClusterInfo, error) {
 	return args.Get(0).([]domain.ClusterInfo), args.Error(1)
 }
 
+func (m *MockClusterService) RemoveNode(address string) (string, error) {
+	args := m.Called()
+	return args.String(0), args.Error(1)
+}
+
 func TestMustReturnClusterInfo(t *testing.T) {
 	app := setupApp()
 

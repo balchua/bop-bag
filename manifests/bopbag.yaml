@@ -33,6 +33,7 @@ metadata:
   labels:
     app: bopbag
 spec:
+  type: NodePort
   ports:
   - port: 80
     targetPort: web

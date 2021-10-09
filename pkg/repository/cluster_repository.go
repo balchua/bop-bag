@@ -22,3 +22,19 @@ func (c *ClusterRepository) ClusterInfo() ([]byte, error) {
 	}
 	return clusterInfoInBytes, nil
 }
+
+func (c *ClusterRepository) RemoveNode(address string) (string, error) {
+	nodeRemoved, err := c.db.RemoveNode(address)
+	if err != nil {
+		return "", err
+	}
+	return nodeRemoved, nil
+}
+
+func (c *ClusterRepository) FindLeader() (string, error) {
+	leadeNodeAddress, err := c.db.Leader()
+	if err != nil {
+		return "", err
+	}
+	return leadeNodeAddress, nil
+}

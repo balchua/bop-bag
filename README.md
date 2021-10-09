@@ -133,19 +133,19 @@ go test -p=1 --coverpkg=./... -coverprofile=cover.out ./...
 
 First node
 ```
-./bopbag serve --db /tmp/dbPath
+./bopbag serve --db /tmp/dbPath --certs default-certs --dbAddress norse:9000
 ```
 
 Second node
 
 ```
-./bopbag serve --db /tmp/dbPath2 --port 8081 --dbAddress norse:9001 --join norse:9000
+./bopbag serve --db /tmp/dbPath2 --certs default-certs --port 8081 --dbAddress norse:9001 --join norse:9000
 ```
 
 Third node
 
 ```
-./bopbag serve --db /tmp/dbPath3/ --port 8082 --dbAddress  norse:9003 --join norse:9000
+./bopbag serve --db /tmp/dbPath3/ --certs default-certs --port 8082 --dbAddress  norse:9003 --join norse:9000
 ```
 
 Show cluster information `/api/v1/clusterInfo`

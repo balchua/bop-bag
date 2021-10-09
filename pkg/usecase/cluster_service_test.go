@@ -18,6 +18,16 @@ func (m *MockClusterRepository) ClusterInfo() ([]byte, error) {
 	return args.Get(0).([]byte), args.Error(1)
 }
 
+func (m *MockClusterRepository) RemoveNode(address string) (string, error) {
+	args := m.Called(address)
+	return args.String(0), args.Error(1)
+}
+
+func (m *MockClusterRepository) FindLeader() (string, error) {
+	args := m.Called()
+	return args.String(0), args.Error(1)
+}
+
 func TestMustSuccessfullyReturnClusterInfo(t *testing.T) {
 	logger := applog.NewLogger()
 	mockClusterRepo := new(MockClusterRepository)
@@ -84,5 +94,31 @@ func TestMustFailIfInvalidJSON(t *testing.T) {
 	service := NewClusterService(mockClusterRepo, logger)
 
 	_, err := service.GetClusterInfo()
+	assert.NotNil(t, err)
+}
+
+func TestReturnRemovedNode(t *testing.T) {
+	logger := applog.NewLogger()
+	mockClusterRepo := new(MockClusterRepository)
+	data := "localhost:50000"
+	mockClusterRepo.On("RemoveNode", data).Return(data, nil)
+
+	service := NewClusterService(mockClusterRepo, logger)
+
+	node, err := service.RemoveNode("localhost:50000")
+	assert.Equal(t, "localhost:50000", node)
+
+	assert.Nil(t, err)
+}
+
+func TestFailedRemovedNode(t *testing.T) {
+	logger := applog.NewLogger()
+	mockClusterRepo := new(MockClusterRepository)
+	data := "localhost:50000"
+	mockClusterRepo.On("RemoveNode", data).Return(data, fmt.Errorf("lost leader"))
+
+	service := NewClusterService(mockClusterRepo, logger)
+
+	_, err := service.RemoveNode("localhost:50000")
 	assert.NotNil(t, err)
 }

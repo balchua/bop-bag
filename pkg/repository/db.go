@@ -11,4 +11,6 @@ type Db interface {
 	Exec(query string, args ...interface{}) (sql.Result, error)
 	QueryRow(query string, args ...interface{}) *sql.Row
 	GetClusterInfo() ([]byte, error)
+	RemoveNode(address string) (string, error)
+	Leader() (string, error)
 }

@@ -36,3 +36,23 @@ func TestMustRetrieveClusterInfo(t *testing.T) {
 	result := string(indented.Bytes())
 	assert.Contains(result, "127.0.0.1:50000")
 }
+
+func TestTryRemoveNode(t *testing.T) {
+	assert := assert.New(t)
+	applog := applog.NewLogger()
+
+	dir, err := ioutil.TempDir("/tmp/", "tempdb")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(dir)
+	dbAddress := "127.0.0.1:50000"
+	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil, false, "")
+	defer dqliteInst.CloseDqlite()
+
+	repo := NewClusterRepository(dqliteInst)
+
+	data, err := repo.RemoveNode(dbAddress)
+	assert.NotNil(err)
+	assert.Equal("", data)
+}

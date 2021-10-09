@@ -14,4 +14,5 @@ type TaskService interface {
 
 type ClusterService interface {
 	GetClusterInfo() ([]domain.ClusterInfo, error)
+	RemoveNode(address string) (string, error)
 }
