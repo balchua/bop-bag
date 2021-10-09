@@ -221,3 +221,22 @@ To simulate faults, simple scale the replicas to less than a majority for exampl
 
 You will no longer be able to access the endpoints like `/api/v1/tasks`
 
+## Operations
+
+### Adding entries
+
+```
+curl -d '{ "title": "My First Task", "details": "Here you go, this is what i should do", "createdDate": "2021-10-25"}' -H "Content-Type: application/json" -X POST http://localhost:32657/api/v1/task
+```
+
+### Get cluster information
+
+```
+curl -X GET http://localhost:32657/api/v1/clusterInfo
+```
+
+### Get all tasks
+
+```
+curl -X GET http://localhost:32657/api/v1/tasks
+```

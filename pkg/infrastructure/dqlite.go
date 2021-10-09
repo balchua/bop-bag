@@ -77,7 +77,7 @@ func NewDqlite(log *applog.Logger, dbPath string, dbAddress string, join []strin
 		return nil, err
 	}
 
-	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(300*time.Second))
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(120*time.Second))
 
 	defer cancel()
 
@@ -201,6 +201,13 @@ func (d *Dqlite) Leader() (string, error) {
 }
 
 func (d *Dqlite) Shutdown(ctx context.Context) {
-	d.dqlite.Handover(ctx)
-	d.dqlite.Close()
+	if err := d.db.Close(); err != nil {
+		d.log.Log.Sugar().Errorf("Unable to close the db %v", err)
+	}
+	if err := d.dqlite.Handover(ctx); err != nil {
+		d.log.Log.Sugar().Errorf("Unable to handover leadership %v", err)
+	}
+	if err := d.dqlite.Close(); err != nil {
+		d.log.Log.Sugar().Errorf("Unable to shutdown dqlite %v", err)
+	}
 }

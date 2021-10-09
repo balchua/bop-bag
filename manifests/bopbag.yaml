@@ -37,6 +37,7 @@ spec:
   ports:
   - port: 80
     targetPort: web
+    nodePort: 32657
     name: web
   selector:
     app: bopbag
@@ -78,7 +79,7 @@ spec:
             mountPath: /data
           - name: certs
             mountPath: /app/certs
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 30
       volumes:
         - name: certs
           secret:
