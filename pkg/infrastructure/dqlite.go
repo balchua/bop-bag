@@ -199,3 +199,8 @@ func (d *Dqlite) Leader() (string, error) {
 	return leader.Address, nil
 
 }
+
+func (d *Dqlite) Shutdown(ctx context.Context) {
+	d.dqlite.Handover(ctx)
+	d.dqlite.Close()
+}

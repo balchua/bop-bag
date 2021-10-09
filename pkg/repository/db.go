@@ -13,4 +13,5 @@ type Db interface {
 	GetClusterInfo() ([]byte, error)
 	RemoveNode(address string) (string, error)
 	Leader() (string, error)
+	Shutdown(ctx context.Context)
 }

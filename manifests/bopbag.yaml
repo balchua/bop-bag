@@ -48,7 +48,7 @@ metadata:
   namespace: bopbag
 spec:
   serviceName: "bopbag-headless"
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: bopbag
@@ -77,7 +77,8 @@ spec:
           - name: data
             mountPath: /data
           - name: certs
-            mountPath: /app/certs            
+            mountPath: /app/certs
+      terminationGracePeriodSeconds: 10
       volumes:
         - name: certs
           secret:

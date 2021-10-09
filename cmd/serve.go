@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"strconv"
@@ -105,6 +106,11 @@ func startDqLite() {
 
 }
 
+func shutdownDqlite() {
+	dqliteInst.Shutdown(context.Background())
+
+}
+
 func start(cmd *cobra.Command, args []string) {
 
 	applogger = applog.NewLogger()
@@ -118,4 +124,6 @@ func start(cmd *cobra.Command, args []string) {
 	signal.Notify(ch, unix.SIGQUIT)
 	signal.Notify(ch, unix.SIGTERM)
 	<-ch
+
+	shutdownDqlite()
 }
