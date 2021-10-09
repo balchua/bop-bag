@@ -103,7 +103,7 @@ docker build -f Dockerfile.base -t localhost:32000/dqlite-base:1.9.0 .
 Building the app 
 
 ```
-docker build -t localhost:32000/bopbag:1.0.0 .
+docker build -t localhost:32000/bopbag .
 ```
 
 ### Building in your host
@@ -169,4 +169,55 @@ Show cluster information `/api/v1/clusterInfo`
   }
 ]
 ```
+
+### Deploying to Kubernetes
+
+Install MicroK8s on Ubuntu
+
+```shell
+
+sudo snap install microk8s --channel 1.22/stable --classic
+```
+Once the cluster is up and running, enable the following addons
+
+```shell
+microk8s enable dns registry storage
+```
+
+Push the docker imge to the local registry
+
+```shell
+docker push localhost:32000/bopbag
+```
+
+Finally apply the manifest [here](manifests/bopbag.yaml)
+
+```shell
+# The sample manifest is deployed to the bopbag namespace
+microk8s kubectl create ns bopbag
+# deploy the application
+microk8s kubectl apply -f manifest/bopbag.yaml
+```
+
+Check that the application is running
+
+```shell
+microk8s kubectl -n bopbag get pods -o wide
+
+kubectl -n bopbag get pods -o wide
+NAME       READY   STATUS        RESTARTS   AGE     IP            NODE    NOMINATED NODE   READINESS GATES
+bopbag-0   1/1     Running       0          11m     10.1.205.14   norse   <none>           <none>
+```
+
+Scale the number of replicas to 3
+
+```
+microk8s kubectl -n bopbag scale sts/bopbag --replicas=3
+```
+
+### Simulating faults
+
+To simulate faults, simple scale the replicas to less than a majority for example `1`
+
+You will no longer be able to access the endpoints like `/api/v1/tasks`
 

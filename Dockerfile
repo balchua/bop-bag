@@ -11,3 +11,6 @@ COPY pkg/ pkg/
 COPY *.go ./
 
 RUN go build .
+# RUN apt-get update && apt-get install -y iputils-ping dnsutils
+COPY runbopbag.sh /app
+ENTRYPOINT bash runbopbag.sh
