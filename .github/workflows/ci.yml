@@ -30,5 +30,10 @@ jobs:
         env:
           CGO_LDFLAGS_ALLOW: "-Wl,-z,now"      
         run: go test -p=1 -coverpkg=./... -coverprofile=coverage.txt -covermode=count ./... 
-      - name: Upload coverage to Codecov
-        run: bash <(curl -s https://codecov.io/bash)
+      - uses: codecov/codecov-action@v2
+        with:
+          files: ./coverage.txt
+          flags: unittests # optional
+          name: codecov-umbrella # optional
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)
