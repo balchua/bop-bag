@@ -69,6 +69,30 @@ func TestTryRemoveNode(t *testing.T) {
 	assert.Equal("127.0.0.1:50000", data)
 }
 
+func TestRemoveNoneExistentNode(t *testing.T) {
+	assert := assert.New(t)
+	applog := applog.NewLogger()
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+	certsPath := path + "/default-certs/"
+	enableTls := true
+	dir, err := ioutil.TempDir("/tmp/", "tempdb")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(dir)
+	dbAddress := "127.0.0.1:50000"
+	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil, enableTls, certsPath)
+	defer dqliteInst.Shutdown(context.TODO())
+
+	repo := NewClusterRepository(dqliteInst)
+
+	_, removeErr := repo.RemoveNode("127.0.0.1:2000")
+	assert.NotNil(removeErr)
+}
+
 func TestFailDbStartupNoDataDirectory(t *testing.T) {
 	assert := assert.New(t)
 	applog := applog.NewLogger()
