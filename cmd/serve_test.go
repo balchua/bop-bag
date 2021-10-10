@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -51,7 +50,7 @@ func TestStartApplication(t *testing.T) {
 	port = 8000
 	startDqLite()
 	defer os.Remove(dir)
-	defer dqliteInst.Shutdown(context.TODO())
+	defer shutdownDqlite()
 
 	startWiring()
 	go startAppServer()
