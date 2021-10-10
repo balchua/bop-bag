@@ -89,3 +89,21 @@ func TestMustTryToRemoveNode(t *testing.T) {
 	// Verify, if the status code is as expected
 	assert.Equalf(t, 200, resp.StatusCode, "Snode removed")
 }
+
+func TestFailRemoveNode(t *testing.T) {
+	app := setupApp()
+
+	removedNode := "norse:9000"
+	// create an instance of our test object
+	mockClusterService := new(MockClusterService)
+
+	mockClusterService.On("RemoveNode", removedNode).Return(removedNode, fmt.Errorf("unable to remove node %s", removedNode))
+
+	controller := NewClusterController(mockClusterService)
+
+	app.Delete("/api/v1/node/:nodeId", controller.RemoveNode)
+	req := httptest.NewRequest("DELETE", "/api/v1/node/"+removedNode, nil)
+	resp, _ := app.Test(req, 1)
+	// Verify, if the status code is as expected
+	assert.Equalf(t, 503, resp.StatusCode, "node removed")
+}
