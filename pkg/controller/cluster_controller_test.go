@@ -22,7 +22,7 @@ func (m *MockClusterService) GetClusterInfo() ([]domain.ClusterInfo, error) {
 }
 
 func (m *MockClusterService) RemoveNode(address string) (string, error) {
-	args := m.Called()
+	args := m.Called(address)
 	return args.String(0), args.Error(1)
 }
 
@@ -70,4 +70,22 @@ func TestMustFailWithBadResponse(t *testing.T) {
 	// Verify, if the status code is as expected
 	assert.Equalf(t, 503, resp.StatusCode, "Show cluster info")
 
+}
+
+func TestMustTryToRemoveNode(t *testing.T) {
+	app := setupApp()
+
+	removedNode := "norse:9000"
+	// create an instance of our test object
+	mockClusterService := new(MockClusterService)
+
+	mockClusterService.On("RemoveNode", removedNode).Return(removedNode, nil)
+
+	controller := NewClusterController(mockClusterService)
+
+	app.Delete("/api/v1/node/:nodeId", controller.RemoveNode)
+	req := httptest.NewRequest("DELETE", "/api/v1/node/"+removedNode, nil)
+	resp, _ := app.Test(req, 1)
+	// Verify, if the status code is as expected
+	assert.Equalf(t, 200, resp.StatusCode, "Snode removed")
 }

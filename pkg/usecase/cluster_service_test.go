@@ -46,7 +46,10 @@ func TestMustSuccessfullyReturnClusterInfo(t *testing.T) {
 		  "Role": 2
 		}
 	  ]`)
+
 	mockClusterRepo.On("ClusterInfo").Return(data, nil)
+	leaderAddress := "norse:9000"
+	mockClusterRepo.On("FindLeader").Return(leaderAddress, nil)
 
 	service := NewClusterService(mockClusterRepo, logger)
 
@@ -71,6 +74,8 @@ func TestMustFailIfUnSuccessfulCall(t *testing.T) {
 		}
 	  ]`)
 	mockClusterRepo.On("ClusterInfo").Return(data, fmt.Errorf("dqlite error"))
+	leaderAddress := "norse:9000"
+	mockClusterRepo.On("FindLeader").Return(leaderAddress, fmt.Errorf("no leader found"))
 
 	service := NewClusterService(mockClusterRepo, logger)
 
@@ -90,7 +95,8 @@ func TestMustFailIfInvalidJSON(t *testing.T) {
 		}
 	  `)
 	mockClusterRepo.On("ClusterInfo").Return(data, nil)
-
+	leaderAddress := "norse:9000"
+	mockClusterRepo.On("FindLeader").Return(leaderAddress, fmt.Errorf("no leader found"))
 	service := NewClusterService(mockClusterRepo, logger)
 
 	_, err := service.GetClusterInfo()

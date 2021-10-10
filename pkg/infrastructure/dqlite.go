@@ -73,7 +73,7 @@ func NewDqlite(log *applog.Logger, dbPath string, dbAddress string, join []strin
 	dqlite, err = app.New(dbPath, options...)
 
 	if err != nil {
-		log.Log.Fatal("Error while initializing dqlite %v", zap.Error(err))
+		log.Log.Sugar().Errorf("Error while initializing dqlite %v", zap.Error(err))
 		return nil, err
 	}
 
@@ -82,7 +82,7 @@ func NewDqlite(log *applog.Logger, dbPath string, dbAddress string, join []strin
 	defer cancel()
 
 	if err := dqlite.Ready(ctx); err != nil {
-		log.Log.Sugar().Fatalf("Error while initializing dqlite %v", zap.Error(err))
+		log.Log.Sugar().Errorf("Error while initializing dqlite %v", zap.Error(err))
 		return nil, err
 	}
 	dqliteInstance.dqlite = dqlite
@@ -92,10 +92,6 @@ func NewDqlite(log *applog.Logger, dbPath string, dbAddress string, join []strin
 
 	log.Log.Sugar().Infof("database %s started", DB_NAME)
 	return dqliteInstance, nil
-}
-
-func (d *Dqlite) CloseDqlite() error {
-	return d.dqlite.Close()
 }
 
 func (d *Dqlite) open() error {
@@ -112,7 +108,7 @@ func (d *Dqlite) open() error {
 }
 
 func (d *Dqlite) dqliteLog(l client.LogLevel, format string, a ...interface{}) {
-	d.log.Log.Sugar().Info("[dqlite]", a)
+	d.log.Log.Sugar().Infof("[dqlite] %s - %v", format, a)
 }
 
 func (d *Dqlite) Query(query string, args ...interface{}) (*sql.Rows, error) {

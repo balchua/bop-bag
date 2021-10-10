@@ -79,6 +79,27 @@ spec:
             mountPath: /data
           - name: certs
             mountPath: /app/certs
+          # readinessProbe:
+          #   tcpSocket:
+          #     port: dqlite
+          #   initialDelaySeconds: 20
+          #   periodSeconds: 10
+          #   failureThreshold: 10
+          #   timeoutSeconds: 10
+          # livenessProbe:
+          #   tcpSocket:
+          #     port: dqlite
+          #   initialDelaySeconds: 60
+          #   periodSeconds: 10
+          #   timeoutSeconds: 10
+          #   failureThreshold: 10
+          # startupProbe:
+          #   tcpSocket:
+          #     port: web
+          #   initialDelaySeconds: 60
+          #   periodSeconds: 120
+          #   failureThreshold: 10
+          #   timeoutSeconds: 60
       terminationGracePeriodSeconds: 30
       volumes:
         - name: certs

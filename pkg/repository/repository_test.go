@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"io/ioutil"
 	"log"
 	"os"
@@ -24,7 +25,7 @@ func TestSuccessfulInsert(t *testing.T) {
 	defer os.Remove(dir)
 	dbAddress := "127.0.0.1:50000"
 	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil, false, "")
-	defer dqliteInst.CloseDqlite()
+	defer dqliteInst.Shutdown(context.TODO())
 	task := &domain.Task{
 		Title:       "test",
 		Details:     "test",
@@ -48,7 +49,7 @@ func TestSuccessfulFindOne(t *testing.T) {
 	defer os.Remove(dir)
 	dbAddress := "127.0.0.1:50000"
 	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil, false, "")
-	defer dqliteInst.CloseDqlite()
+	defer dqliteInst.Shutdown(context.TODO())
 
 	task := &domain.Task{
 		Title:       "test",
@@ -77,7 +78,7 @@ func TestSuccessfulFindAll(t *testing.T) {
 	defer os.Remove(dir)
 	dbAddress := "127.0.0.1:50000"
 	dqliteInst, err := infrastructure.NewDqlite(applog, dir, dbAddress, nil, false, "")
-	defer dqliteInst.CloseDqlite()
+	defer dqliteInst.Shutdown(context.TODO())
 
 	task := &domain.Task{
 		Title:       "test",
