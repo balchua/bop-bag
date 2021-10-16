@@ -12,8 +12,10 @@ import (
 const (
 	taskSchema = "CREATE TABLE IF NOT EXISTS TASKS (ID INTEGER PRIMARY KEY AUTOINCREMENT, TITLE VARCHAR(50), DETAILS VARCHAR(1000), CREATED_DATE VARCHAR(50), UNIQUE(ID))"
 	insert     = "INSERT INTO TASKS (TITLE, DETAILS, CREATED_DATE) VALUES(?,?,?)"
+	delete     = "DELETE FROM TASKS WHERE ID = ?"
 	findById   = "SELECT ID, TITLE, DETAILS, CREATED_DATE FROM TASKS WHERE ID = ?"
 	findAll    = "SELECT ID, TITLE, DETAILS, CREATED_DATE FROM TASKS"
+	update     = "UPDATE TASKS SET TITLE=?, DETAILS=? WHERE ID=?"
 )
 
 type TaskRepositoryImpl struct {
@@ -112,4 +114,45 @@ func (t *TaskRepositoryImpl) FindAll() (*[]domain.Task, error) {
 	}
 
 	return &tasks, nil
+}
+
+func (t *TaskRepositoryImpl) Delete(id int64) error {
+	var err error
+	var result sql.Result
+	var rowsAffected int64
+
+	lg, _ := zap.NewProduction()
+
+	lg.Info("Id to find", zap.Int64("id", id))
+
+	if result, err = t.db.Exec(delete, id); err != nil {
+		return err
+	}
+	rowsAffected, err = result.RowsAffected()
+
+	lg.Info("number of rows affected", zap.Int64("rows", rowsAffected))
+
+	return nil
+
+}
+
+func (t *TaskRepositoryImpl) Update(task *domain.Task) (*domain.Task, error) {
+	var err error
+	var result sql.Result
+	currentTime := time.Now()
+	task.CreatedDate = currentTime.Format(time.RFC1123)
+	if result, err = t.db.Exec(update, task.Title, task.Details, task.Id); err != nil {
+		return nil, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	t.log.Log.Info("record updated", zap.Int64("records", rowsAffected))
+	id := task.Id
+	returnTask := &domain.Task{
+		Id:          id,
+		Title:       task.Title,
+		Details:     task.Details,
+		CreatedDate: task.CreatedDate,
+	}
+	return returnTask, err
 }

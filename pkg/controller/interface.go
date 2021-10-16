@@ -8,6 +8,8 @@ import (
 
 type TaskService interface {
 	CreateTask(ctx context.Context, task *domain.Task) (*domain.Task, error)
+	UpdateTask(ctx context.Context, task *domain.Task) (*domain.Task, error)
+	DeleteTask(ctx context.Context, id int64) error
 	GetTaskById(ctx context.Context, id int64) (*domain.Task, error)
 	GetAllTasks(ctx context.Context) (*[]domain.Task, error)
 }

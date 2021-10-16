@@ -33,6 +33,17 @@ func (m *MockedTaskRepository) FindAll() (*[]domain.Task, error) {
 	args := m.Called()
 	return args.Get(0).(*[]domain.Task), args.Error(1)
 }
+
+func (m *MockedTaskRepository) Update(task *domain.Task) (*domain.Task, error) {
+	args := m.Called(task)
+	return args.Get(0).(*domain.Task), args.Error(1)
+}
+
+func (m *MockedTaskRepository) Delete(id int64) error {
+	args := m.Called(id)
+	return args.Error(0)
+}
+
 func TestSuccessfulTaskCreation(t *testing.T) {
 	logger := applog.NewLogger()
 	assert := assert.New(t)
@@ -194,4 +205,21 @@ func TestMustFailGetAllTasks(t *testing.T) {
 
 	_, err := service.GetAllTasks(context.Background())
 	assert.NotNil(err)
+}
+
+func TestSuccessfulTaskDelete(t *testing.T) {
+	logger := applog.NewLogger()
+	assert := assert.New(t)
+
+	// create an instance of our test object
+	mockTaskRepo := new(MockedTaskRepository)
+	id := int64(1)
+
+	// setup expectations
+	mockTaskRepo.On("Delete", int64(1)).Return(nil)
+
+	service := NewTaskService(mockTaskRepo, 1, logger)
+
+	err := service.DeleteTask(context.Background(), id)
+	assert.Nil(err)
 }

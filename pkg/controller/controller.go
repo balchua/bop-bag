@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/balchua/bopbag/pkg/domain"
@@ -59,4 +60,37 @@ func (q *TaskController) FindAll(c *fiber.Ctx) error {
 
 	return c.JSON(tasks)
 
+}
+
+func (q *TaskController) UpdateTask(c *fiber.Ctx) error {
+
+	ctx := context.TODO()
+	task := new(domain.Task)
+	idStr := c.Params("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err := c.BodyParser(task); err != nil {
+		return fiber.NewError(fiber.StatusServiceUnavailable, "marshalling error!")
+	}
+	task.Id = id
+	newTask, err := q.taskService.UpdateTask(ctx, task)
+	if err != nil {
+		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
+	}
+
+	return c.JSON(newTask)
+}
+
+func (q *TaskController) DeleteTask(c *fiber.Ctx) error {
+	ctx := context.TODO()
+	idStr := c.Params("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+
+	if err != nil {
+		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
+	}
+	if err := q.taskService.DeleteTask(ctx, id); err != nil {
+		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
+	}
+
+	return c.JSON(fmt.Sprintf("task %d is deleted", id))
 }

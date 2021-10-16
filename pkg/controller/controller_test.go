@@ -22,6 +22,15 @@ func (m *MockTaskService) CreateTask(ctx context.Context, task *domain.Task) (*d
 	return args.Get(0).(*domain.Task), args.Error(1)
 }
 
+func (m *MockTaskService) UpdateTask(ctx context.Context, task *domain.Task) (*domain.Task, error) {
+	args := m.Called(ctx, task)
+	return args.Get(0).(*domain.Task), args.Error(1)
+}
+
+func (m *MockTaskService) DeleteTask(ctx context.Context, id int64) error {
+	args := m.Called(id)
+	return args.Error(0)
+}
 func (m *MockTaskService) GetTaskById(ctx context.Context, id int64) (*domain.Task, error) {
 	args := m.Called(ctx, id)
 	return args.Get(0).(*domain.Task), args.Error(1)

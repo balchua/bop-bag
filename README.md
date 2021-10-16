@@ -69,7 +69,7 @@ The implementation will be a simple go based called `TaskRepository`.
     { "title": "My First Task", "details": "Here you go, this is what i should do", "createdDate": "2021-10-25"}
     ```
 
-- [ ] Update a task
+- [X] Update a task
   * Endpoint: `/api/v1/task/{id}`
   * Method: `PUT`
 
@@ -77,7 +77,7 @@ The implementation will be a simple go based called `TaskRepository`.
     { "title": "Update task", "details": "Here you go, I update the task"}
     ```
 
-- [ ] Delete a task
+- [X] Delete a task
   * Endpoint: `/api/v1/task/{id}`
   * Method: `DELETE`
 

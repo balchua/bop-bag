@@ -87,6 +87,8 @@ func startAppServer() {
 	app.Get("/api/v1/task/:id", taskController.FindById)
 	app.Get("/api/v1/tasks", taskController.FindAll)
 	app.Post("/api/v1/task", taskController.NewTask)
+	app.Put("/api/v1/task/:id", taskController.UpdateTask)
+	app.Delete("/api/v1/task/:id", taskController.DeleteTask)
 	app.Get("/api/v1/clusterInfo", clusterController.ShowCluster)
 	app.Delete("/api/v1/node/:nodeId", clusterController.RemoveNode)
 

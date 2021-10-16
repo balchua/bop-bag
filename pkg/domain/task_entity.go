@@ -11,4 +11,6 @@ type TaskRepository interface {
 	Add(task *Task) (*Task, error)
 	FindById(id int64) (*Task, error)
 	FindAll() (*[]Task, error)
+	Delete(id int64) error
+	Update(task *Task) (*Task, error)
 }
