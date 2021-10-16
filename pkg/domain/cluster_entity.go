@@ -6,3 +6,9 @@ type ClusterInfo struct {
 	Role    uint8  `json:"Role"`
 	Leader  bool   `json:"Leader"`
 }
+
+type ClusterRepository interface {
+	ClusterInfo() ([]byte, error)
+	RemoveNode(address string) (string, error)
+	FindLeader() (string, error)
+}

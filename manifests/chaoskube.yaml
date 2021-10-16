@@ -1,0 +1,79 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: chaoskube
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["list", "delete"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: chaoskube
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaoskube
+subjects:
+- kind: ServiceAccount
+  name: chaoskube
+  namespace: chaoskube
+- kind: ServiceAccount
+  name: chaoskube
+  namespace: bopbag
+- kind: ServiceAccount
+  name: chaoskube
+  namespace: default  
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: chaoskube
+  namespace: chaoskube
+  labels:
+    app: chaoskube
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chaoskube
+  namespace: chaoskube
+  labels:
+    app: chaoskube
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: chaoskube
+  template:
+    metadata:
+      labels:
+        app: chaoskube
+    spec:
+      serviceAccountName: chaoskube
+      containers:
+      - name: chaoskube
+        image: quay.io/linki/chaoskube:v0.21.0
+        args:
+        # kill a pod every 10 minutes
+        - --interval=30s
+        # only consider pods with this annotation
+        - --annotations=chaos.alpha.kubernetes.io/enabled=true
+        # let's make sure we all agree on what the above times mean
+        - --timezone=UTC
+        # terminate pods for real: this disables dry-run mode which is on by default
+        - --no-dry-run
+        # enable debug
+        - --debug
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 65534
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]

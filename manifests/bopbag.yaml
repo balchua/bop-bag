@@ -17,6 +17,7 @@ metadata:
   labels:
     app: bopbag
 spec:
+  publishNotReadyAddresses: true
   ports:
   - port: 9000
     name: dqlite
@@ -57,6 +58,8 @@ spec:
     metadata:
       labels:
         app: bopbag
+      annotations:
+        chaos.alpha.kubernetes.io/enabled: "true"        
     spec:
       containers:
         - name: bopbag
@@ -79,28 +82,28 @@ spec:
             mountPath: /data
           - name: certs
             mountPath: /app/certs
-          # readinessProbe:
-          #   tcpSocket:
-          #     port: dqlite
-          #   initialDelaySeconds: 20
-          #   periodSeconds: 10
-          #   failureThreshold: 10
-          #   timeoutSeconds: 10
-          # livenessProbe:
-          #   tcpSocket:
-          #     port: dqlite
-          #   initialDelaySeconds: 60
-          #   periodSeconds: 10
-          #   timeoutSeconds: 10
-          #   failureThreshold: 10
-          # startupProbe:
-          #   tcpSocket:
-          #     port: web
-          #   initialDelaySeconds: 60
-          #   periodSeconds: 120
-          #   failureThreshold: 10
-          #   timeoutSeconds: 60
-      terminationGracePeriodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: dqlite
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 10
+            timeoutSeconds: 60
+          livenessProbe:
+            tcpSocket:
+              port: dqlite
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 10
+            timeoutSeconds: 60
+          startupProbe:
+            tcpSocket:
+              port: dqlite
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 10
+            timeoutSeconds: 60
+      terminationGracePeriodSeconds: 10
       volumes:
         - name: certs
           secret:

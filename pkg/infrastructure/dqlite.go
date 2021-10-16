@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	MAX_CONNECTION           = 5
-	MAX_IDLE_CONNECTION_TIME = 120 * time.Second
+	MAX_CONNECTION           = 2
+	MAX_IDLE_CONNECTION_TIME = 2 * time.Second
 	DB_NAME                  = "bopbag"
 )
 

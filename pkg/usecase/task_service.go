@@ -16,12 +16,12 @@ import (
 )
 
 type TaskService struct {
-	taskRepo TaskRepository
+	taskRepo domain.TaskRepository
 	lg       *applog.Logger
 	retries  uint
 }
 
-func NewTaskService(repo TaskRepository, retries uint, lg *applog.Logger) *TaskService {
+func NewTaskService(repo domain.TaskRepository, retries uint, lg *applog.Logger) *TaskService {
 	return &TaskService{
 		taskRepo: repo,
 		lg:       lg,
@@ -87,7 +87,7 @@ func (t *TaskService) GetAllTasks(ctx context.Context) (*[]domain.Task, error) {
 }
 
 func (t *TaskService) isValidTask(task *domain.Task) bool {
-	if task.Title == "" || task.Details == "" || task.CreatedDate == "" {
+	if task.Title == "" || task.Details == "" {
 		return false
 	}
 	return true

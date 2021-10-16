@@ -64,10 +64,18 @@ The implementation will be a simple go based called `TaskRepository`.
 - [X] Insert a task
   * Endpoint `/api/v1/task`
   * Method: `POST`
+  * Body (json) :
+    ```json
+    { "title": "My First Task", "details": "Here you go, this is what i should do", "createdDate": "2021-10-25"}
+    ```
 
 - [ ] Update a task
   * Endpoint: `/api/v1/task/{id}`
   * Method: `PUT`
+
+    ```json
+    { "title": "Update task", "details": "Here you go, I update the task"}
+    ```
 
 - [ ] Delete a task
   * Endpoint: `/api/v1/task/{id}`
@@ -217,9 +225,35 @@ microk8s kubectl -n bopbag scale sts/bopbag --replicas=3
 
 ### Simulating faults
 
-To simulate faults, simple scale the replicas to less than a majority for example `1`
+To simulate faults, if you are running on kubernetes delete one of the pods.
 
-You will no longer be able to access the endpoints like `/api/v1/tasks`
+```shell
+kubectl -n bopbag delete po bopbag-0
+```
+
+The hit the query endpoint, you will see that it continues to serve the request.
+
+#### Using chaoskube
+
+Give the proper rbac permissions to chaoskube
+
+```shell
+kubectl apply -f manifest/chaoskube-rbac.yaml
+```
+
+Install chaoskube tailored for this demo
+
+```shell
+kubectl apply -f manifest/chaoskube.yaml
+```
+
+#### Uninstall chaoskube
+
+```shell
+kubectl delete -f manifest/chaoskube.yaml
+```
+
+
 
 ## Operations
 

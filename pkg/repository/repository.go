@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/balchua/bopbag/pkg/applog"
 	"github.com/balchua/bopbag/pkg/domain"
@@ -44,6 +45,8 @@ func (t *TaskRepositoryImpl) migrate() error {
 func (t *TaskRepositoryImpl) Add(task *domain.Task) (*domain.Task, error) {
 	var err error
 	var result sql.Result
+	currentTime := time.Now()
+	task.CreatedDate = currentTime.Format(time.RFC1123)
 	if result, err = t.db.Exec(insert, task.Title, task.Details, task.CreatedDate); err != nil {
 		return nil, err
 	}

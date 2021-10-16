@@ -8,11 +8,11 @@ import (
 )
 
 type ClusterService struct {
-	clusterRepo ClusterRepository
+	clusterRepo domain.ClusterRepository
 	logger      *applog.Logger
 }
 
-func NewClusterService(clusterRepo ClusterRepository, logger *applog.Logger) *ClusterService {
+func NewClusterService(clusterRepo domain.ClusterRepository, logger *applog.Logger) *ClusterService {
 	return &ClusterService{
 		clusterRepo: clusterRepo,
 		logger:      logger,
