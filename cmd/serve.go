@@ -70,7 +70,7 @@ func init() {
 
 func startWiring() {
 	retries := 5000
-	taskRepo, _ = repository.NewTaskRepository(applogger, dqliteInst)
+	taskRepo, _ = repository.NewTaskRepository(applogger, dqliteInst.DB())
 	taskService = usecase.NewTaskService(taskRepo, uint(retries), applogger)
 	clusterRepo = repository.NewClusterRepository(dqliteInst)
 	clusterService = usecase.NewClusterService(clusterRepo, applogger)

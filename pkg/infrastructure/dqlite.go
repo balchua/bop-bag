@@ -22,6 +22,7 @@ const (
 	MAX_CONNECTION           = 2
 	MAX_IDLE_CONNECTION_TIME = 2 * time.Second
 	DB_NAME                  = "bopbag"
+	taskSchema               = "CREATE TABLE IF NOT EXISTS TASKS (ID INTEGER PRIMARY KEY AUTOINCREMENT, TITLE VARCHAR(50), DETAILS VARCHAR(1000), CREATED_DATE VARCHAR(50), UNIQUE(ID))"
 )
 
 type Dqlite struct {
@@ -90,6 +91,10 @@ func NewDqlite(log *applog.Logger, dbPath string, dbAddress string, join []strin
 		return nil, err
 	}
 
+	if err := dqliteInstance.migrate(); err != nil {
+		return nil, err
+	}
+
 	log.Log.Sugar().Infof("database %s started", DB_NAME)
 	return dqliteInstance, nil
 }
@@ -107,23 +112,20 @@ func (d *Dqlite) open() error {
 	return nil
 }
 
+func (d *Dqlite) migrate() error {
+	var err error
+	if _, err = d.db.Exec(taskSchema); err != nil {
+		d.log.Log.Fatal("unable to create schema", zap.Error(err))
+	}
+	return err
+}
+
 func (d *Dqlite) dqliteLog(l client.LogLevel, format string, a ...interface{}) {
 	d.log.Log.Sugar().Infof("[dqlite] %s - %v", format, a)
 }
 
-func (d *Dqlite) Query(query string, args ...interface{}) (*sql.Rows, error) {
-	return d.db.Query(query, args...)
-}
-
-func (d *Dqlite) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
-	return d.db.ExecContext(ctx, query, args...)
-}
-func (d *Dqlite) Exec(query string, args ...interface{}) (sql.Result, error) {
-	return d.db.Exec(query, args...)
-}
-
-func (d *Dqlite) QueryRow(query string, args ...interface{}) *sql.Row {
-	return d.db.QueryRow(query, args...)
+func (d *Dqlite) DB() *sql.DB {
+	return d.db
 }
 
 func (d *Dqlite) GetClusterInfo() ([]byte, error) {

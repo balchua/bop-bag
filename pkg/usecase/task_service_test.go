@@ -223,3 +223,68 @@ func TestSuccessfulTaskDelete(t *testing.T) {
 	err := service.DeleteTask(context.Background(), id)
 	assert.Nil(err)
 }
+
+func TestFailedTaskDelete(t *testing.T) {
+	logger := applog.NewLogger()
+	assert := assert.New(t)
+
+	// create an instance of our test object
+	mockTaskRepo := new(MockedTaskRepository)
+	id := int64(1)
+
+	// setup expectations
+	mockTaskRepo.On("Delete", int64(1)).Return(fmt.Errorf("unable to delete"))
+
+	service := NewTaskService(mockTaskRepo, 1, logger)
+
+	err := service.DeleteTask(context.Background(), id)
+	assert.NotNil(err)
+}
+
+func TestSuccessfulTaskUpdate(t *testing.T) {
+	logger := applog.NewLogger()
+	assert := assert.New(t)
+
+	// create an instance of our test object
+	mockTaskRepo := new(MockedTaskRepository)
+	task := &domain.Task{
+		Id:          int64(1),
+		Title:       "abc",
+		Details:     "new details",
+		CreatedDate: "20210926",
+	}
+	newTask := task
+	newTask.Id = 1
+
+	// setup expectations
+	mockTaskRepo.On("Update", task).Return(newTask, nil)
+
+	service := NewTaskService(mockTaskRepo, 1, logger)
+
+	response, err := service.UpdateTask(context.Background(), task)
+	assert.NotNil(response)
+	assert.Nil(err)
+}
+
+func TestFailTaskUpdate(t *testing.T) {
+	logger := applog.NewLogger()
+	assert := assert.New(t)
+
+	// create an instance of our test object
+	mockTaskRepo := new(MockedTaskRepository)
+	task := &domain.Task{
+		Title:       "test",
+		Details:     "test",
+		CreatedDate: "20210926",
+	}
+	newTask := task
+	newTask.Id = 1
+
+	// setup expectations
+	mockTaskRepo.On("Update", task).Return(newTask, fmt.Errorf("database error"))
+
+	service := NewTaskService(mockTaskRepo, 1, logger)
+
+	_, err := service.UpdateTask(context.Background(), task)
+	assert.NotNil(err)
+}

@@ -5,18 +5,18 @@ import (
 )
 
 type ClusterRepository struct {
-	db  Db
-	log *applog.Logger
+	clusterOps ClusterOps
+	log        *applog.Logger
 }
 
-func NewClusterRepository(db Db) *ClusterRepository {
+func NewClusterRepository(clusterOps ClusterOps) *ClusterRepository {
 	return &ClusterRepository{
-		db: db,
+		clusterOps: clusterOps,
 	}
 }
 
 func (c *ClusterRepository) ClusterInfo() ([]byte, error) {
-	clusterInfoInBytes, err := c.db.GetClusterInfo()
+	clusterInfoInBytes, err := c.clusterOps.GetClusterInfo()
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func (c *ClusterRepository) ClusterInfo() ([]byte, error) {
 }
 
 func (c *ClusterRepository) RemoveNode(address string) (string, error) {
-	nodeRemoved, err := c.db.RemoveNode(address)
+	nodeRemoved, err := c.clusterOps.RemoveNode(address)
 	if err != nil {
 		return "", err
 	}
@@ -32,7 +32,7 @@ func (c *ClusterRepository) RemoveNode(address string) (string, error) {
 }
 
 func (c *ClusterRepository) FindLeader() (string, error) {
-	leadeNodeAddress, err := c.db.Leader()
+	leadeNodeAddress, err := c.clusterOps.Leader()
 	if err != nil {
 		return "", err
 	}

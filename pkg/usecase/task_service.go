@@ -33,6 +33,8 @@ func NewTaskService(repo domain.TaskRepository, retries uint, lg *applog.Logger)
 func (t *TaskService) CreateTask(ctx context.Context, task *domain.Task) (*domain.Task, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(20)*time.Millisecond)
 	defer cancel()
+	currentTime := time.Now()
+	task.CreatedDate = currentTime.Format(time.RFC1123)
 
 	var newTask *domain.Task
 	//validate the fields as part of the business requirement

@@ -3,6 +3,7 @@ module github.com/balchua/bopbag
 go 1.16
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0 // indirect
 	github.com/Rican7/retry v0.3.1
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/canonical/go-dqlite v1.9.0

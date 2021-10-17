@@ -10,45 +10,30 @@ import (
 )
 
 const (
-	taskSchema = "CREATE TABLE IF NOT EXISTS TASKS (ID INTEGER PRIMARY KEY AUTOINCREMENT, TITLE VARCHAR(50), DETAILS VARCHAR(1000), CREATED_DATE VARCHAR(50), UNIQUE(ID))"
-	insert     = "INSERT INTO TASKS (TITLE, DETAILS, CREATED_DATE) VALUES(?,?,?)"
-	delete     = "DELETE FROM TASKS WHERE ID = ?"
-	findById   = "SELECT ID, TITLE, DETAILS, CREATED_DATE FROM TASKS WHERE ID = ?"
-	findAll    = "SELECT ID, TITLE, DETAILS, CREATED_DATE FROM TASKS"
-	update     = "UPDATE TASKS SET TITLE=?, DETAILS=? WHERE ID=?"
+	insert   = "INSERT INTO TASKS (TITLE, DETAILS, CREATED_DATE) VALUES(?,?,?)"
+	delete   = "DELETE FROM TASKS WHERE ID = ?"
+	findById = "SELECT ID, TITLE, DETAILS, CREATED_DATE FROM TASKS WHERE ID = ?"
+	findAll  = "SELECT ID, TITLE, DETAILS, CREATED_DATE FROM TASKS"
+	update   = "UPDATE TASKS SET TITLE=?, DETAILS=? WHERE ID=?"
 )
 
 type TaskRepositoryImpl struct {
-	db  Db
+	db  *sql.DB
 	log *applog.Logger
 }
 
-func NewTaskRepository(applog *applog.Logger, db Db) (*TaskRepositoryImpl, error) {
+func NewTaskRepository(applog *applog.Logger, db *sql.DB) (*TaskRepositoryImpl, error) {
 	taskRepo := &TaskRepositoryImpl{
 		db:  db,
 		log: applog,
 	}
-	err := taskRepo.migrate()
-
-	if err != nil {
-		return nil, err
-	}
 	return taskRepo, nil
-}
-
-func (t *TaskRepositoryImpl) migrate() error {
-	var err error
-	if _, err = t.db.Exec(taskSchema); err != nil {
-		t.log.Log.Fatal("unable to create schema", zap.Error(err))
-	}
-	return err
 }
 
 func (t *TaskRepositoryImpl) Add(task *domain.Task) (*domain.Task, error) {
 	var err error
 	var result sql.Result
-	currentTime := time.Now()
-	task.CreatedDate = currentTime.Format(time.RFC1123)
+
 	if result, err = t.db.Exec(insert, task.Title, task.Details, task.CreatedDate); err != nil {
 		return nil, err
 	}

@@ -235,3 +235,94 @@ func TestMustFailWhenUnableToInsertATask(t *testing.T) {
 	assert.Equalf(t, 503, resp.StatusCode, "New task")
 
 }
+
+func TestMustDeleteTask(t *testing.T) {
+	id := int64(1)
+	// prepare the mock
+	mockTaskService := new(MockTaskService)
+	mockTaskService.On("DeleteTask", id).Return(nil)
+	controller := NewTaskController(mockTaskService)
+
+	//set up fiber
+	app := setupApp()
+	app.Delete("/api/v1/task/:id", controller.DeleteTask)
+
+	req := httptest.NewRequest("DELETE", "/api/v1/task/1", nil)
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req, 1)
+
+	// Verify, if the status code is as expected
+	assert.Equalf(t, 200, resp.StatusCode, "Delete task")
+
+}
+
+func TestFailDeleteTask(t *testing.T) {
+	id := int64(1)
+	// prepare the mock
+	mockTaskService := new(MockTaskService)
+	mockTaskService.On("DeleteTask", id).Return(fmt.Errorf("service unable to delete task"))
+	controller := NewTaskController(mockTaskService)
+
+	//set up fiber
+	app := setupApp()
+	app.Delete("/api/v1/task/:id", controller.DeleteTask)
+
+	req := httptest.NewRequest("DELETE", "/api/v1/task/1", nil)
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req, 1)
+
+	// Verify, if the status code is as expected
+	assert.Equalf(t, 503, resp.StatusCode, "Delete task")
+
+}
+
+func TestMustBeAbleToUpdateTask(t *testing.T) {
+
+	// prepare the mock
+	task := &domain.Task{
+		Id:      1,
+		Title:   "Ok task",
+		Details: "Updating my task",
+	}
+	mockTaskService := new(MockTaskService)
+	mockTaskService.On("UpdateTask", mock.Anything, task).Return(task, nil)
+	controller := NewTaskController(mockTaskService)
+
+	//set up fiber
+	app := setupApp()
+	app.Put("/api/v1/task/:id", controller.UpdateTask)
+
+	var jsonData = `{ "title": "Ok task", "details": "Updating my task"}`
+	req := httptest.NewRequest("PUT", "/api/v1/task/1", strings.NewReader(jsonData))
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req, 1)
+
+	// Verify, if the status code is as expected
+	assert.Equalf(t, 200, resp.StatusCode, "Update task")
+
+}
+
+func TestFailUpdateTask(t *testing.T) {
+
+	task := &domain.Task{
+		Id:      1,
+		Title:   "Ok task",
+		Details: "Updating my task",
+	}
+	// prepare the mock
+	mockTaskService := new(MockTaskService)
+	mockTaskService.On("UpdateTask", mock.Anything, task).Return(fmt.Errorf("service unable to delete task"))
+	controller := NewTaskController(mockTaskService)
+
+	//set up fiber
+	app := setupApp()
+	app.Put("/api/v1/task/:id", controller.UpdateTask)
+
+	req := httptest.NewRequest("PUT", "/api/v1/task/1", nil)
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := app.Test(req, 1)
+
+	// Verify, if the status code is as expected
+	assert.Equalf(t, 503, resp.StatusCode, "Fail to update task")
+
+}
