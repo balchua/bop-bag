@@ -57,7 +57,7 @@ metadata:
   namespace: bopbag
 spec:
   serviceName: "bopbag-headless"
-  replicas: 5
+  replicas: 3
   selector:
     matchLabels:
       app: bopbag
@@ -125,7 +125,7 @@ spec:
           #   periodSeconds: 5
           #   failureThreshold: 10
           #   timeoutSeconds: 60
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 10
       volumes:
         - name: certs
           secret:

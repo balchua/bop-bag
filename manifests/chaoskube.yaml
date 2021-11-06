@@ -68,8 +68,8 @@ spec:
       - name: chaoskube
         image: quay.io/linki/chaoskube:v0.21.0
         args:
-        # kill a pod every 2 minutes
-        - --interval=120s
+        # kill a pod every 1 minute
+        - --interval=60s
         # only consider pods with this annotation
         - --annotations=chaos.alpha.kubernetes.io/enabled=true
         # let's make sure we all agree on what the above times mean
