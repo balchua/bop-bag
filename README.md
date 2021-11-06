@@ -31,6 +31,11 @@ There is a sample openssl configuration template that you can use [here](default
 openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes -keyout ${HOME}/bopbag/certs/cluster.key -out ${HOME}/bopbag/certs/cluster.crt -subj "/CN=bopbag" -config csr-dqlite.conf -extensions v3_ext
 ```
 
+## Caveat
+
+Based on observation, dqlite is susceptible to unstable network, hence it is recommended to use `hostNetwork`.
+Work needs to be done to fix the [`runbopbag.sh`](runbopbag.sh), since it relies on the hostname of the nodes to provide proper numbering like `-0`,`-1` etc to be able to form the cluster.
+
 ## Implementation
 
 We will be using [dqlite](https://dqlite.io/) -  _Dqlite is a fast, embedded, persistent SQL database with Raft consensus that is perfect for fault-tolerant IoT and Edge devices._ to keep our data.
@@ -274,3 +279,4 @@ curl -X GET http://localhost:32657/api/v1/clusterInfo
 ```
 curl -X GET http://localhost:32657/api/v1/tasks
 ```
+
