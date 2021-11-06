@@ -57,7 +57,7 @@ metadata:
   namespace: bopbag
 spec:
   serviceName: "bopbag-headless"
-  replicas: 3
+  replicas: 5
   selector:
     matchLabels:
       app: bopbag
@@ -66,8 +66,9 @@ spec:
       labels:
         app: bopbag
       annotations:
-        chaos.alpha.kubernetes.io/enabled: "true"        
+        chaos.alpha.kubernetes.io/enabled: "true" 
     spec:
+      hostNetwork: true
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -80,7 +81,7 @@ spec:
             topologyKey: "kubernetes.io/hostname"    
       containers:
         - name: bopbag
-          image: balchu/bopbag
+          image: balchu/bopbag:1.0.1
           imagePullPolicy: Always    
           ports:
           - containerPort: 8000
@@ -93,33 +94,37 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name             
             - name: HEADLESS_SVC
-              value: "bopbag-headless"           
+              value: "bopbag-headless"
+            - name: LIBRAFT_TRACE
+              value: "1"
+            - name: LIBDQLITE_TRACE
+              value: "1"        
           volumeMounts:
           - name: data
             mountPath: /data
           - name: certs
             mountPath: /app/certs
-          readinessProbe:
-            tcpSocket:
-              port: dqlite
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            failureThreshold: 10
-            timeoutSeconds: 60
-          livenessProbe:
-            tcpSocket:
-              port: dqlite
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            failureThreshold: 10
-            timeoutSeconds: 60
-          startupProbe:
-            tcpSocket:
-              port: dqlite
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            failureThreshold: 10
-            timeoutSeconds: 60
+          # readinessProbe:
+          #   tcpSocket:
+          #     port: dqlite
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 5
+          #   failureThreshold: 10
+          #   timeoutSeconds: 60
+          # livenessProbe:
+          #   tcpSocket:
+          #     port: dqlite
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 5
+          #   failureThreshold: 10
+          #   timeoutSeconds: 60
+          # startupProbe:
+          #   tcpSocket:
+          #     port: dqlite
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 5
+          #   failureThreshold: 10
+          #   timeoutSeconds: 60
       terminationGracePeriodSeconds: 30
       volumes:
         - name: certs

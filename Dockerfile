@@ -1,4 +1,4 @@
-FROM localhost:32000/dqlite-base:1.9.0
+FROM balchu/dqlite-base:1.9.0
 ENV CGO_LDFLAGS_ALLOW="-Wl,-z,now"
 WORKDIR /app
 
